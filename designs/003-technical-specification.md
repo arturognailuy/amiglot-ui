@@ -1,7 +1,4 @@
-# Amiglot — Technical Specification (Moved from 002)
-
-> This document contains the technical constraints and data contract moved from
-> `002-production-specification.md` per request. No content updates yet.
+# Amiglot — Technical Specification
 
 ## 1. Technical Constraints
 **Frontend (UI)**

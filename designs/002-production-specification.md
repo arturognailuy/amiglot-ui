@@ -4,11 +4,13 @@
 ### Onboarding & Profile
 - As a new learner, I can sign up via a magic link so I can get into the product without passwords.
 - As a new learner, I can create a profile with a unique handle, birth year + month, country, and languages so I can be discoverable by partners.
-- As a learner, I must set at least one native language and at least one target language so matching is meaningful.
+- As a learner, I must set at least one native language so my profile can be created; additional languages and levels can be added later.
+- As a learner with only one native language set, I cannot search for others or be discoverable until more language data is added.
 - As a learner, I can edit my profile fields (except email) to keep my info current.
 - As a learner, I can manage my availability (days/time blocks + timezone) so the system can surface good overlaps.
 
 ### Discovery & Matching
+- Matching criteria and profile language model are TBD and will be refined before implementation.
 - As a learner, I can search and filter candidates by language pair, level, availability overlap, age (derived), and country so I can find compatible partners.
 - As a learner, I can view a candidate profile and send a match request with a short intro note.
 - As a learner, I can accept or decline incoming match requests so I control who can chat with me.
@@ -28,9 +30,9 @@
 **Path**
 1. User enters email → requests magic link.
 2. User clicks magic link → authenticated session created.
-3. User completes profile (handle, native + target languages, levels, country, birth year/month, availability).
-4. System validates profile and sets status to “discoverable”.
-5. User appears in search results.
+3. User completes profile (handle, native language, country, birth year/month, availability; target languages/levels may be added later).
+4. System validates profile and sets status to “discoverable” only if minimum language data is sufficient.
+5. User appears in search results when discoverable.
 
 **Mermaid**
 ```mermaid
