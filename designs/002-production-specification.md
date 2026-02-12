@@ -3,11 +3,17 @@
 ## 1. User Stories (Detailed)
 ### Onboarding & Profile
 - As a new learner, I can sign up via a magic link so I can get into the product without passwords.
-- As a new learner, I can create a profile with a unique handle, birth year + month, country, and languages so I can be discoverable by partners.
+- As a new learner, I can create a profile with a unique handle (stored without `@`; UI adds the `@` prefix), birth year + month, country, and languages so I can be discoverable by partners.
 - As a learner, I must set at least one native language so my profile can be created; additional languages and levels can be added later.
 - As a learner with only one native language set, I cannot search for others or be discoverable until more language data is added.
 - As a learner, I can edit my profile fields (except email) to keep my info current.
 - As a learner, I can manage my availability (days/time blocks + timezone) so the system can surface good overlaps.
+
+**Availability definition**
+- Users select availability in their **local timezone** (days/time blocks).
+- System **stores availability in UTC** for matching.
+- If a user does not set availability, the system **derives a default** based on their timezone and stores it in UTC.
+
 
 ### Discovery & Matching
 - As a learner, I can add languages with a proficiency level (and an optional short description) so others understand my ability.
