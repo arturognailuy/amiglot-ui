@@ -93,33 +93,29 @@ CREATE INDEX user_languages_language_idx ON user_languages(language_code, level)
 > - At least one `is_native = true` per user
 > - Target languages can overlap with native/teachable languages but do not have to
 
-**availability_windows**
-Weekly availability stored in **UTC**, derived from local time. We also store the original local fields to allow re-derivation on timezone/DST changes.
+**availability_slots**
+Weekly availability stored in **local time + timezone** (no static UTC columns). Matching converts to UTC for specific dates at query time to handle DST shifts correctly.
 
 ```sql
-CREATE TABLE availability_windows (
+CREATE TABLE availability_slots (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  -- UTC representation (weekly blocks)
-  weekday_utc SMALLINT NOT NULL CHECK (weekday_utc BETWEEN 0 AND 6),
-  start_minute_utc SMALLINT NOT NULL CHECK (start_minute_utc BETWEEN 0 AND 1439),
-  end_minute_utc SMALLINT NOT NULL CHECK (end_minute_utc BETWEEN 1 AND 1440),
-  -- Original local selection (for recompute)
+  weekday SMALLINT NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  start_local_time TIME NOT NULL,
+  end_local_time TIME NOT NULL,
   timezone TEXT NOT NULL,
-  weekday_local SMALLINT NOT NULL CHECK (weekday_local BETWEEN 0 AND 6),
-  start_minute_local SMALLINT NOT NULL CHECK (start_minute_local BETWEEN 0 AND 1439),
-  end_minute_local SMALLINT NOT NULL CHECK (end_minute_local BETWEEN 1 AND 1440),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX availability_user_idx ON availability_windows(user_id);
-CREATE INDEX availability_utc_idx ON availability_windows(weekday_utc, start_minute_utc, end_minute_utc);
+CREATE INDEX availability_user_idx ON availability_slots(user_id);
+CREATE INDEX availability_local_idx ON availability_slots(weekday, start_local_time, end_local_time);
 ```
 
 > Notes
 > - App ensures `start < end` and handles wrap‑around by splitting into two rows.
-> - UTC fields are derived from local time + timezone; on DST shifts, the app re‑derives UTC from the stored local fields (e.g., on save/login or periodic refresh) so matching stays correct.
+> - `timezone` defaults to the profile timezone but can be overridden per slot.
+> - Matching converts `(date + weekday + start/end_local_time AT TIME ZONE timezone)` into UTC during search.
 
 #### 2.1.3 Matching & Messaging
 
@@ -252,16 +248,24 @@ WHERE p.discoverable = true
   );
 ```
 
-**Availability overlap**
+**Availability overlap (conceptual)**
 ```sql
-SELECT DISTINCT a2.user_id
-FROM availability_windows a1
-JOIN availability_windows a2
-  ON a1.weekday_utc = a2.weekday_utc
- AND a1.start_minute_utc < a2.end_minute_utc
- AND a2.start_minute_utc < a1.end_minute_utc
-WHERE a1.user_id = :user_id
-  AND a2.user_id <> :user_id;
+-- Inputs: :user_id, :target_date (the date being searched, e.g., next Monday)
+SELECT DISTINCT s2.user_id
+FROM availability_slots s1
+JOIN availability_slots s2
+  ON (
+    (:target_date + s1.weekday)::timestamp + s1.start_local_time AT TIME ZONE s1.timezone
+  ) < (
+    (:target_date + s2.weekday)::timestamp + s2.end_local_time AT TIME ZONE s2.timezone
+  )
+ AND (
+    (:target_date + s2.weekday)::timestamp + s2.start_local_time AT TIME ZONE s2.timezone
+  ) < (
+    (:target_date + s1.weekday)::timestamp + s1.end_local_time AT TIME ZONE s1.timezone
+  )
+WHERE s1.user_id = :user_id
+  AND s2.user_id <> :user_id;
 ```
 
 **Create match request**
@@ -290,7 +294,7 @@ VALUES (:match_id, :sender_id, :body);
 #### 2.1.6 Migration Notes
 - Existing `users` table already present in `amiglot-api` migrations; add new tables via sequential migrations.
 - When user changes handle, update `profiles.handle` and `profiles.handle_norm`.
-- When timezone changes, recompute availability UTC blocks from stored local selections.
+- Availability slots are stored in local time + timezone; matching converts to UTC at query time, so DST shifts are handled without rewriting rows.
 
 ### 2.2 API JSON Shapes (current)
 **GET /healthz**
