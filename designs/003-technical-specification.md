@@ -248,26 +248,6 @@ WHERE p.discoverable = true
   );
 ```
 
-**Availability overlap (conceptual)**
-```sql
--- Inputs: :user_id, :target_date (the date being searched, e.g., next Monday)
-SELECT DISTINCT s2.user_id
-FROM availability_slots s1
-JOIN availability_slots s2
-  ON (
-    (:target_date + s1.weekday)::timestamp + s1.start_local_time AT TIME ZONE s1.timezone
-  ) < (
-    (:target_date + s2.weekday)::timestamp + s2.end_local_time AT TIME ZONE s2.timezone
-  )
- AND (
-    (:target_date + s2.weekday)::timestamp + s2.start_local_time AT TIME ZONE s2.timezone
-  ) < (
-    (:target_date + s1.weekday)::timestamp + s1.end_local_time AT TIME ZONE s1.timezone
-  )
-WHERE s1.user_id = :user_id
-  AND s2.user_id <> :user_id;
-```
-
 **Create match request**
 ```sql
 INSERT INTO match_requests (requester_id, recipient_id, status, intro_message)
