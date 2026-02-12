@@ -14,7 +14,6 @@
 - System **stores availability in UTC** for matching.
 - If a user does not set availability, the system **derives a default** based on their timezone and stores it in UTC.
 
-
 ### Discovery & Matching
 - As a learner, I can add languages with a proficiency level (and an optional short description) so others understand my ability.
 - As a learner, I can only be matched when there is a **mutual exchange**: each person wants to learn a language the other can teach.
@@ -140,5 +139,3 @@ flowchart TD
   C --> D[Messaging disabled]
 ```
 
-## Database schema
-- The V1 database schema is defined in `003-technical-specification.md`.

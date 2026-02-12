@@ -1,19 +1,39 @@
-# Amiglot — Database Schema (V1)
+# Amiglot — Technical Specification
 
-This document defines the **database schema** for V1 and replaces the earlier “current schema” notes. For product context and user stories, see:
+## 1. Technical Constraints
+**Frontend (UI)**
+- Next.js 16.1.6, React 19.2.3, TypeScript 5.x
+- ESLint + Prettier, strict lint/typecheck/build in CI
+
+**Backend (API)**
+- Go 1.24
+- Huma (HTTP framework)
+- PostgreSQL with pgx + sqlc, migrations via goose
+- API port: 6174
+
+**Product constraints**
+- Day‑1 multi‑language support for all UI and user‑facing API messages.
+- V1 auth via magic link (dev mode: local link generation when `ENV=dev`).
+- Profile: unique handle (letters/numbers only), stored as `@handle`, case‑insensitive.
+- Avoid gender; store birth year + month only, derive age on the fly.
+
+## 2. Data Contract
+
+### 2.1 Database Schema (V1)
+This section defines the **database schema** for V1 and replaces the earlier “current schema” notes. For product context and user stories, see:
 - `001-production-definition.md`
 - `002-production-specification.md`
 
-## 0. Conventions
+#### 2.1.1 Conventions
 - **Primary keys:** UUID (`gen_random_uuid()`)
 - **Timestamps:** `timestamptz` in UTC
 - **Handles:** stored **without** `@`, UI displays with `@`
 - **Timezone:** IANA name (e.g., `America/Vancouver`)
 - **Languages:** BCP‑47 language code (e.g., `en`, `es-ES`)
 
-## 1. Core Tables
+#### 2.1.2 Core Tables
 
-### 1.1 users
+**users**
 Auth + identity (email only in V1).
 
 ```sql
@@ -25,7 +45,7 @@ CREATE TABLE users (
 );
 ```
 
-### 1.2 profiles
+**profiles**
 One row per user.
 
 ```sql
@@ -50,7 +70,7 @@ CREATE TABLE profiles (
 > - `handle_norm` is the lowercase version of `handle` for case‑insensitive uniqueness.
 > - `discoverable` is set by the app when minimum profile + language rules are satisfied.
 
-### 1.3 user_languages
+**user_languages**
 All languages a user knows and/or wants to learn.
 
 ```sql
@@ -75,7 +95,7 @@ CREATE INDEX user_languages_language_idx ON user_languages(language_code, level)
 > - At least one `is_native = true` per user
 > - Target languages can overlap with native/teachable languages but do not have to
 
-### 1.4 availability_windows
+**availability_windows**
 Weekly availability stored in **UTC**, derived from local time. We also store the original local fields to allow re‑derivation on timezone/DST changes.
 
 ```sql
@@ -104,9 +124,9 @@ CREATE INDEX availability_utc_idx ON availability_windows(weekday_utc, start_min
 > - App ensures `start < end` and handles wrap‑around by splitting into two rows.
 > - If a user provides no availability, defaults are generated in local time, converted to UTC, and saved with `created_by_default = true`.
 
-## 2. Matching & Messaging
+#### 2.1.3 Matching & Messaging
 
-### 2.1 match_requests
+**match_requests**
 
 ```sql
 CREATE TABLE match_requests (
@@ -125,7 +145,7 @@ CREATE UNIQUE INDEX match_requests_unique_pending
   WHERE status = 'pending';
 ```
 
-### 2.2 matches
+**matches**
 
 ```sql
 CREATE TABLE matches (
@@ -142,7 +162,7 @@ CREATE UNIQUE INDEX matches_unique_pair
   ON matches (LEAST(user_a, user_b), GREATEST(user_a, user_b));
 ```
 
-### 2.3 messages
+**messages**
 
 ```sql
 CREATE TABLE messages (
@@ -158,9 +178,9 @@ CREATE INDEX messages_match_idx ON messages(match_id, created_at);
 
 > Application ensures `sender_id` belongs to the match.
 
-## 3. Safety & Admin (Minimal V1)
+#### 2.1.4 Safety & Admin (Minimal V1)
 
-### 3.1 user_blocks
+**user_blocks**
 
 ```sql
 CREATE TABLE user_blocks (
@@ -173,7 +193,7 @@ CREATE TABLE user_blocks (
 );
 ```
 
-### 3.2 user_reports
+**user_reports**
 
 ```sql
 CREATE TABLE user_reports (
@@ -185,11 +205,10 @@ CREATE TABLE user_reports (
 );
 ```
 
-## 4. Query Examples (Use Cases)
-
-### 4.1 Search candidates (filters + mutual match rules)
+#### 2.1.5 Query Examples (Use Cases)
 Pseudo‑SQL showing the logic; actual implementation can be optimized with CTEs and indexes.
 
+**Search candidates (filters + mutual match rules)**
 ```sql
 -- Inputs: :user_id, :target_language, :min_level, :age_range, :country_code
 WITH me AS (
@@ -236,9 +255,7 @@ WHERE p.discoverable = true
   );
 ```
 
-### 4.2 Availability overlap
-Assuming weekly UTC blocks:
-
+**Availability overlap**
 ```sql
 SELECT DISTINCT a2.user_id
 FROM availability_windows a1
@@ -250,15 +267,13 @@ WHERE a1.user_id = :user_id
   AND a2.user_id <> :user_id;
 ```
 
-### 4.3 Create match request
-
+**Create match request**
 ```sql
 INSERT INTO match_requests (requester_id, recipient_id, status, intro_message)
 VALUES (:requester_id, :recipient_id, 'pending', :intro_message);
 ```
 
-### 4.4 Accept match request
-
+**Accept match request**
 ```sql
 UPDATE match_requests
 SET status = 'accepted', responded_at = now()
@@ -269,14 +284,23 @@ VALUES (:requester_id, :recipient_id)
 ON CONFLICT DO NOTHING;
 ```
 
-### 4.5 Send message
-
+**Send message**
 ```sql
 INSERT INTO messages (match_id, sender_id, body)
 VALUES (:match_id, :sender_id, :body);
 ```
 
-## 5. Migration Notes
+#### 2.1.6 Migration Notes
 - Existing `users` table already present in `amiglot-api` migrations; add new tables via sequential migrations.
 - When user changes handle, update `profiles.handle` and `profiles.handle_norm`.
 - When timezone changes, recompute availability UTC blocks from stored local selections.
+
+### 2.2 API JSON Shapes (current)
+**GET /healthz**
+```json
+{
+  "ok": true
+}
+```
+
+> Note: profile, match, and messaging endpoints and JSON contracts are TBD; they should align with the V1 must‑have flows described in the production definition.
