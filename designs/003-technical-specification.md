@@ -1,4 +1,4 @@
-# Amiglot — Technical Specification
+# Amiglot - Technical Specification
 
 ## 1. Technical Constraints
 **Frontend (UI)**
@@ -12,24 +12,22 @@
 - API port: 6174
 
 **Product constraints**
-- Day‑1 multi‑language support for all UI and user‑facing API messages.
+- Day-1 multi-language support for all UI and user-facing API messages.
 - V1 auth via magic link (dev mode: local link generation when `ENV=dev`).
-- Profile: unique handle (letters/numbers only), stored as `@handle`, case‑insensitive.
+- Profile: unique handle (letters/numbers/underscore), stored as `@handle`, case-insensitive.
 - Avoid gender; store birth year + month only, derive age on the fly.
 
 ## 2. Data Contract
 
 ### 2.1 Database Schema (V1)
-This section defines the **database schema** for V1 and replaces the earlier “current schema” notes. For product context and user stories, see:
-- `001-production-definition.md`
-- `002-production-specification.md`
+This section defines the **database schema** for V1 and replaces the earlier "current schema" notes.
 
 #### 2.1.1 Conventions
 - **Primary keys:** UUID (`gen_random_uuid()`)
 - **Timestamps:** `timestamptz` in UTC
 - **Handles:** stored **without** `@`, UI displays with `@`
 - **Timezone:** IANA name (e.g., `America/Vancouver`)
-- **Languages:** BCP‑47 language code (e.g., `en`, `es-ES`)
+- **Languages:** BCP-47 language code (e.g., `en`, `es-ES`)
 
 #### 2.1.2 Core Tables
 
@@ -60,14 +58,14 @@ CREATE TABLE profiles (
   discoverable BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (handle ~ '^[a-zA-Z0-9]+$')
+  CHECK (handle ~ '^[a-zA-Z0-9_]+$')
 );
 
--- keep handle_norm in lowercase (app‑side or trigger)
+-- keep handle_norm in lowercase (app-side or trigger)
 ```
 
 > Notes
-> - `handle_norm` is the lowercase version of `handle` for case‑insensitive uniqueness.
+> - `handle_norm` is the lowercase version of `handle` for case-insensitive uniqueness.
 > - `discoverable` is set by the app when minimum profile + language rules are satisfied.
 
 **user_languages**
@@ -96,7 +94,7 @@ CREATE INDEX user_languages_language_idx ON user_languages(language_code, level)
 > - Target languages can overlap with native/teachable languages but do not have to
 
 **availability_windows**
-Weekly availability stored in **UTC**, derived from local time. We also store the original local fields to allow re‑derivation on timezone/DST changes.
+Weekly availability stored in **UTC**, derived from local time. We also store the original local fields to allow re-derivation on timezone/DST changes.
 
 ```sql
 CREATE TABLE availability_windows (
@@ -111,7 +109,6 @@ CREATE TABLE availability_windows (
   weekday_local SMALLINT NOT NULL CHECK (weekday_local BETWEEN 0 AND 6),
   start_minute_local SMALLINT NOT NULL CHECK (start_minute_local BETWEEN 0 AND 1439),
   end_minute_local SMALLINT NOT NULL CHECK (end_minute_local BETWEEN 1 AND 1440),
-  created_by_default BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -122,7 +119,7 @@ CREATE INDEX availability_utc_idx ON availability_windows(weekday_utc, start_min
 
 > Notes
 > - App ensures `start < end` and handles wrap‑around by splitting into two rows.
-> - If a user provides no availability, defaults are generated in local time, converted to UTC, and saved with `created_by_default = true`.
+> - UTC fields are derived from local time + timezone; on DST shifts, the app re‑derives UTC from the stored local fields (e.g., on save/login or periodic refresh) so matching stays correct.
 
 #### 2.1.3 Matching & Messaging
 
@@ -157,7 +154,7 @@ CREATE TABLE matches (
   CHECK (user_a <> user_b)
 );
 
--- prevent duplicate pairs (order‑independent)
+-- prevent duplicate pairs (order-independent)
 CREATE UNIQUE INDEX matches_unique_pair
   ON matches (LEAST(user_a, user_b), GREATEST(user_a, user_b));
 ```
@@ -206,7 +203,7 @@ CREATE TABLE user_reports (
 ```
 
 #### 2.1.5 Query Examples (Use Cases)
-Pseudo‑SQL showing the logic; actual implementation can be optimized with CTEs and indexes.
+Pseudo-SQL showing the logic; actual implementation can be optimized with CTEs and indexes.
 
 **Search candidates (filters + mutual match rules)**
 ```sql
@@ -303,4 +300,4 @@ VALUES (:match_id, :sender_id, :body);
 }
 ```
 
-> Note: profile, match, and messaging endpoints and JSON contracts are TBD; they should align with the V1 must‑have flows described in the production definition.
+> Note: profile, match, and messaging endpoints and JSON contracts are TBD; they should align with the V1 must-have flows described in the production definition.
