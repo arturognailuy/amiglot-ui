@@ -14,17 +14,18 @@ type VerifyResponse = {
 
 export default function VerifyPage() {
   const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
+    () => (token ? "loading" : "error"),
   );
-  const [message, setMessage] = useState<string>("Verifying your link...");
+  const [message, setMessage] = useState<string>(() =>
+    token
+      ? "Verifying your link..."
+      : "Missing token. Please request a new magic link.",
+  );
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
     if (!token) {
-      setStatus("error");
-      setMessage("Missing token. Please request a new magic link.");
       return;
     }
 
@@ -42,7 +43,7 @@ export default function VerifyPage() {
             : "We could not verify this link.",
         );
       });
-  }, [searchParams]);
+  }, [token]);
 
   return (
     <div className={styles.page}>
