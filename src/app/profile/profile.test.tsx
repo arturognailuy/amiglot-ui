@@ -665,7 +665,7 @@ describe("ProfileForm", () => {
     await user.clear(handleInput);
     await user.type(handleInput, "neo!");
 
-    expect(await screen.findByText(/handle can only use letters, numbers, or underscores/i)).toBeInTheDocument();
+    expect(await screen.findByText(/handle can only use letters and numbers/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /save profile/i })).toBeDisabled();
     expect(putJson).not.toHaveBeenCalled();
   });

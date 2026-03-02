@@ -18,7 +18,7 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 ## 3. Test Data & Accounts
 - Each test case uses a **fresh account** (new email + handle).
 - Email format: `test+<timestamp>@gnailuy.com`.
-- Handle format: `tester_<timestamp>`.
+- Handle format: `tester<timestamp>`.
 - Primary languages for the plan: **Chinese** (native) + **Portuguese** (target).
 - Default timezone for checks: `America/Vancouver` unless specified.
 
@@ -67,9 +67,16 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 ### P2. Handle availability
 **Setup:** Fresh account; complete A1.
 **Steps:**
-1. Enter a new handle `tester_<timestamp>`.
+1. Enter a new handle `tester<timestamp>`.
 2. Pause until availability check completes.
 **Expected:** Availability indicator shows available.
+
+### P2b. Dropdown focus on open
+**Setup:** Fresh account; complete A1.
+**Steps:**
+1. Set a country, language, birth month/year, and timezone.
+2. Re-open each dropdown.
+**Expected:** The currently selected option is focused and scrolled near the middle of the list.
 
 ### P3. Validation on save
 **Setup:** Fresh account; complete A1.

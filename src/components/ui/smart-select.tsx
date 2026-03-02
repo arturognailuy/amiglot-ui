@@ -55,6 +55,23 @@ function SearchableSelect({
 }: Omit<SmartSelectProps, "longListThreshold">) {
   const [open, setOpen] = React.useState(false);
   const selected = options.find((option) => option.value === value);
+  const [commandValue, setCommandValue] = React.useState(selected?.label ?? "");
+  const selectedRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const nextValue = selected?.label ?? "";
+    setCommandValue(nextValue);
+    const raf = requestAnimationFrame(() => {
+      if (selectedRef.current) {
+        selectedRef.current.scrollIntoView({ block: "center" });
+        selectedRef.current.focus?.();
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open, selected?.label]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,7 +90,7 @@ function SearchableSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[var(--radix-popover-content-available-width)] p-0">
-        <Command>
+        <Command value={commandValue} onValueChange={setCommandValue}>
           <CommandInput placeholder={searchPlaceholder} aria-label={searchAriaLabel} />
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
@@ -82,6 +99,7 @@ function SearchableSelect({
                 <CommandItem
                   key={option.value}
                   value={option.label}
+                  ref={option.value === value ? selectedRef : undefined}
                   onSelect={() => {
                     onValueChange(option.value);
                     setOpen(false);
@@ -112,8 +130,24 @@ function SimpleSelect({
   placeholder = "Select an option",
   className,
 }: Omit<SmartSelectProps, "longListThreshold" | "searchPlaceholder" | "emptyText" | "searchAriaLabel">) {
+  const [open, setOpen] = React.useState(false);
+  const selectedRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const raf = requestAnimationFrame(() => {
+      if (selectedRef.current) {
+        selectedRef.current.scrollIntoView({ block: "center" });
+        selectedRef.current.focus?.();
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open, value]);
+
   return (
-    <Select value={value} onValueChange={onValueChange}>
+    <Select value={value} onValueChange={onValueChange} open={open} onOpenChange={setOpen}>
       <SelectTrigger id={id} className={className}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -121,7 +155,11 @@ function SimpleSelect({
         {options.map((option) => {
           if (option.value === "") return null;
           return (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem
+              key={option.value}
+              value={option.value}
+              ref={option.value === value ? selectedRef : undefined}
+            >
               {option.label}
             </SelectItem>
           );

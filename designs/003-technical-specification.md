@@ -8,7 +8,7 @@ whenToUse: "Read when implementing UI features or aligning with frontend technic
 ## 1. Product Constraints (shared)
 - Day-1 multi-language support for all UI and user-facing API messages.
 - V1 auth via magic link (dev mode: local link generation when `ENV=dev`).
-- Profile: unique handle (letters/numbers/underscore), stored **without** `@` and case-insensitive; UI displays with `@` prefix.
+- Profile: unique handle (letters/numbers), stored **without** `@` and case-insensitive; UI displays with `@` prefix.
 - Avoid gender; store birth year + month only, derive age on the fly.
 
 > Frontend technical constraints and coding standards live in `designs/000-architecture-guidelines.md`.
