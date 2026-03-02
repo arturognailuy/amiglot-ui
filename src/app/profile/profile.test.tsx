@@ -756,6 +756,8 @@ describe("ProfilePage", () => {
     await screen.findByText(/profile setup/i);
 
     const handleInput = screen.getByPlaceholderText("arturo");
+    await waitFor(() => expect(handleInput).toHaveValue("arturo"));
+
     await user.clear(handleInput);
     await user.type(handleInput, "ab");
     await user.tab();
