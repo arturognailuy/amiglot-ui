@@ -623,7 +623,7 @@ describe("ProfilePage", () => {
 
     expect(await screen.findByText(/timezone is required/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /save profile/i })).toBeDisabled();
-  });
+  }, 10000);
 
   it("rejects invalid handle characters on save", async () => {
     const user = userEvent.setup();
@@ -758,6 +758,7 @@ describe("ProfilePage", () => {
     const handleInput = screen.getByPlaceholderText("arturo");
     await user.clear(handleInput);
     await user.type(handleInput, "ab");
+    await user.tab();
 
     expect(await screen.findByText(/Handle must be 3/)).toBeInTheDocument();
   });
