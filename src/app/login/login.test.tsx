@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import messages from '@/i18n/messages/en.json';
-import LoginPage from './page';
+import LoginForm from './login-form';
 
 const postJson = vi.fn();
 let originalAppUrl: string | undefined;
@@ -35,7 +35,7 @@ const renderWithIntl = (ui: React.ReactElement) =>
         </NextIntlClientProvider>,
     );
 
-describe('LoginPage', () => {
+describe('LoginForm', () => {
     beforeEach(() => {
         postJson.mockReset();
         originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -51,7 +51,7 @@ describe('LoginPage', () => {
     });
 
     it('renders basic form validation attributes', () => {
-        renderWithIntl(<LoginPage />);
+        renderWithIntl(<LoginForm />);
 
         const input = screen.getByLabelText(/email address/i);
         expect(input).toHaveAttribute('required');
@@ -61,7 +61,7 @@ describe('LoginPage', () => {
     it('submits email and shows success message', async () => {
         postJson.mockResolvedValue({ ok: true });
 
-        renderWithIntl(<LoginPage />);
+        renderWithIntl(<LoginForm />);
 
         await userEvent.type(
             screen.getByLabelText(/email address/i),
@@ -85,7 +85,7 @@ describe('LoginPage', () => {
             dev_login_url: 'http://dev-link',
         });
 
-        renderWithIntl(<LoginPage />);
+        renderWithIntl(<LoginForm />);
 
         await userEvent.type(
             screen.getByLabelText(/email address/i),
@@ -108,7 +108,7 @@ describe('LoginPage', () => {
             dev_login_url: 'http://127.0.0.1:3000/auth/verify?token=abc',
         });
 
-        renderWithIntl(<LoginPage />);
+        renderWithIntl(<LoginForm />);
 
         await userEvent.type(
             screen.getByLabelText(/email address/i),
@@ -131,7 +131,7 @@ describe('LoginPage', () => {
     it('shows error message on failure', async () => {
         postJson.mockRejectedValue(new Error('nope'));
 
-        renderWithIntl(<LoginPage />);
+        renderWithIntl(<LoginForm />);
 
         await userEvent.type(
             screen.getByLabelText(/email address/i),
