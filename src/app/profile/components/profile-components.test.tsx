@@ -94,6 +94,54 @@ describe("Profile Components Coverage", () => {
     expect(screen.getByText("Handle Error")).toBeInTheDocument();
   });
 
+  it("ProfileDetailsSection shows handle status states", () => {
+    const baseDefaults = {
+      handle: "testuser",
+      birthYear: "",
+      birthMonth: "",
+      countryCode: "",
+      timezone: "",
+      languages: [],
+      availability: [],
+    };
+
+    const renderWithAvailability = (availability: "checking" | "unavailable" | "invalid") => {
+      const TestComponent = () => {
+        const methods = useForm<ProfileFormValues>({
+          defaultValues: baseDefaults,
+        });
+
+        return (
+          <ProfileDetailsSection
+            t={t}
+            control={methods.control}
+            register={methods.register}
+            errors={{}}
+            email="test@example.com"
+            effectiveHandleAvailability={availability}
+            handleChanged
+            birthYearOptions={[]}
+            birthMonthOptions={[]}
+            countryOptions={[]}
+            timezoneOptions={[]}
+            onNext={() => {}}
+          />
+        );
+      };
+
+      render(<TestComponent />);
+    };
+
+    renderWithAvailability("checking");
+    expect(screen.getByText("handleAvailabilityChecking")).toBeInTheDocument();
+
+    renderWithAvailability("unavailable");
+    expect(screen.getByText("handleAvailabilityUnavailable")).toBeInTheDocument();
+
+    renderWithAvailability("invalid");
+    expect(screen.getByText("handleInvalidLengthHelper")).toBeInTheDocument();
+  });
+
   it("ProfileLanguageSection interaction", async () => {
     const onAdd = vi.fn();
     const onRemove = vi.fn();
@@ -178,6 +226,51 @@ describe("Profile Components Coverage", () => {
     expect(screen.getByText("Language Error")).toBeInTheDocument();
   });
 
+
+  it("ProfileLanguageSection toggles target language and adjusts level", async () => {
+    let methodsRef: ReturnType<typeof useForm<ProfileFormValues>> | null = null;
+    const user = userEvent.setup();
+
+    const TestComponent = () => {
+      const methods = useForm<ProfileFormValues>({
+        defaultValues: {
+          handle: "testuser",
+          birthYear: "",
+          birthMonth: "",
+          countryCode: "",
+          timezone: "",
+          languages: [
+            { language_code: "en", level: 5, is_target: false, description: "" },
+          ],
+          availability: [],
+        },
+      });
+      methodsRef = methods;
+      return (
+        <ProfileLanguageSection
+          t={t}
+          control={methods.control}
+          register={methods.register}
+          setValue={methods.setValue}
+          languageOptions={[{ value: "en", label: "English" }]}
+          proficiencyLabels={{ 4: "Advanced", 5: "Native" }}
+          languageFields={[{ id: "1" }]}
+          languages={methods.getValues("languages")}
+          onAddLanguage={() => {}}
+          onRemoveLanguage={() => {}}
+          onNext={() => {}}
+        />
+      );
+    };
+
+    render(<TestComponent />);
+    const checkbox = screen.getByLabelText("targetLanguage") as HTMLInputElement;
+    await user.click(checkbox);
+
+    expect(methodsRef?.getValues("languages.0.is_target")).toBe(true);
+    expect(methodsRef?.getValues("languages.0.level")).toBe(4);
+  });
+
   it("ProfileAvailabilitySection interaction", async () => {
     const onAdd = vi.fn();
     const onRemove = vi.fn();
@@ -254,5 +347,47 @@ describe("Profile Components Coverage", () => {
     };
     render(<TestComponent />);
     expect(screen.getByText("Availability Error")).toBeInTheDocument();
+  });
+
+
+  it("ProfileAvailabilitySection updates weekdays", async () => {
+    let methodsRef: ReturnType<typeof useForm<ProfileFormValues>> | null = null;
+    const user = userEvent.setup();
+
+    const TestComponent = () => {
+      const methods = useForm<ProfileFormValues>({
+        defaultValues: {
+          handle: "testuser",
+          birthYear: "",
+          birthMonth: "",
+          countryCode: "",
+          timezone: "",
+          languages: [],
+          availability: [
+            { weekdays: [1], start_local_time: "09:00", end_local_time: "17:00", timezone: "UTC" },
+          ],
+        },
+      });
+      methodsRef = methods;
+      return (
+        <ProfileAvailabilitySection
+          t={t}
+          control={methods.control}
+          register={methods.register}
+          setValue={methods.setValue}
+          availabilityFields={[{ id: "1" }]}
+          availability={methods.getValues("availability")}
+          timezoneOptions={[{ value: "UTC", label: "UTC" }]}
+          weekdays={["Sun", "Mon"]}
+          onAddAvailability={() => {}}
+          onRemoveAvailability={() => {}}
+        />
+      );
+    };
+
+    render(<TestComponent />);
+    await user.click(screen.getByLabelText("Sun"));
+
+    expect(methodsRef?.getValues("availability.0.weekdays")).toEqual([0, 1]);
   });
 });
