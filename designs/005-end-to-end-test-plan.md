@@ -130,8 +130,9 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 **Setup:** Fresh account; complete A1.
 **Steps:**
 1. Add slot with multiple weekdays.
-2. Update time range to valid start < end.
-**Expected:** Slot saved locally and remains valid.
+2. Toggle one weekday off again to ensure it can be deselected.
+3. Update time range to valid start < end.
+**Expected:** Weekday toggles update reliably; slot saved locally and remains valid.
 
 ### V2. Grouped weekdays display
 **Setup:** Fresh account; complete A1.

@@ -1,4 +1,4 @@
-import { Controller, type Control, type UseFormRegister, type UseFormSetValue } from "react-hook-form";
+import { Controller, type Control, type UseFormRegister } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ type ProfileAvailabilitySectionProps = {
   t: (key: string) => string;
   control: Control<ProfileFormValues>;
   register: UseFormRegister<ProfileFormValues>;
-  setValue: UseFormSetValue<ProfileFormValues>;
+
   availabilityFields: { id: string }[];
   availability: ProfileFormValues["availability"];
   availabilityErrorMessage?: string;
@@ -26,7 +26,6 @@ export default function ProfileAvailabilitySection({
   t,
   control,
   register,
-  setValue,
   availabilityFields,
   availability,
   availabilityErrorMessage,
@@ -50,40 +49,38 @@ export default function ProfileAvailabilitySection({
             if (!slot) {
               return null;
             }
-            const weekdaysValue = slot.weekdays ?? [];
             return (
-            <div
+              <div
               key={availabilityFields[index]?.id ?? `slot-${index}`}
               className="rounded-lg border border-border/60 p-4"
             >
               <div className="space-y-3">
                 <div className="space-y-2">
                   <Label>{t("weekdaysLabel")}</Label>
-                  <ToggleGroup
-                    type="multiple"
-                    variant="outline"
-                    value={weekdaysValue.map((day) => day.toString())}
-                    onValueChange={(values) => {
-                      const weekdaysSelected = values
-                        .map((value) => Number(value))
-                        .filter((value) => !Number.isNaN(value));
-                      setValue(`availability.${index}.weekdays`, weekdaysSelected.sort(), {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                    }}
-                    className="flex flex-wrap justify-start gap-2"
-                  >
-                    {weekdays.map((label, value) => (
-                      <ToggleGroupItem
-                        key={label}
-                        value={value.toString()}
-                        aria-label={label}
+                  <Controller
+                    control={control}
+                    name={`availability.${index}.weekdays`}
+                    render={({ field }) => (
+                      <ToggleGroup
+                        type="multiple"
+                        variant="outline"
+                        value={(field.value ?? []).map((day) => day.toString())}
+                        onValueChange={(values) => {
+                          const weekdaysSelected = values
+                            .map((value) => Number(value))
+                            .filter((value) => !Number.isNaN(value));
+                          field.onChange(weekdaysSelected.sort());
+                        }}
+                        className="flex flex-wrap justify-start gap-2"
                       >
-                        {label.slice(0, 3)}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
+                        {weekdays.map((label, value) => (
+                          <ToggleGroupItem key={label} value={value.toString()} aria-label={label}>
+                            {label.slice(0, 3)}
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    )}
+                  />
                 </div>
                 <div className="grid gap-3 md:grid-cols-[1fr_1fr_minmax(0,2fr)_auto]">
                   <div className="space-y-2">
@@ -125,8 +122,8 @@ export default function ProfileAvailabilitySection({
                   </div>
                 </div>
               </div>
-            </div>
-          );
+              </div>
+            );
           })}
         </div>
         <Button type="button" variant="secondary" onClick={onAddAvailability}>

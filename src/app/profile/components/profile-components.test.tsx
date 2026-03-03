@@ -167,7 +167,6 @@ describe("Profile Components Coverage", () => {
           t={t}
           control={methods.control}
           register={methods.register}
-          setValue={methods.setValue}
           // errors removed
           languageOptions={[{ value: "en", label: "English" }]}
           proficiencyLabels={{ 5: "Native" }}
@@ -210,7 +209,6 @@ describe("Profile Components Coverage", () => {
           t={t}
           control={methods.control}
           register={methods.register}
-          setValue={methods.setValue}
           languageErrorMessage="Language Error"
           languageOptions={[]}
           proficiencyLabels={{}}
@@ -251,7 +249,6 @@ describe("Profile Components Coverage", () => {
           t={t}
           control={methods.control}
           register={methods.register}
-          setValue={methods.setValue}
           languageOptions={[{ value: "en", label: "English" }]}
           proficiencyLabels={{ 4: "Advanced", 5: "Native" }}
           languageFields={[{ id: "1" }]}
@@ -298,7 +295,6 @@ describe("Profile Components Coverage", () => {
           t={t}
           control={methods.control}
           register={methods.register}
-          setValue={methods.setValue}
           // errors removed
           availabilityFields={[{ id: "1" }]}
           availability={methods.getValues("availability")}
@@ -337,7 +333,6 @@ describe("Profile Components Coverage", () => {
           t={t}
           control={methods.control}
           register={methods.register}
-          setValue={methods.setValue}
           availabilityErrorMessage="Availability Error"
           availabilityFields={[]}
           availability={[]}
@@ -377,7 +372,6 @@ describe("Profile Components Coverage", () => {
           t={t}
           control={methods.control}
           register={methods.register}
-          setValue={methods.setValue}
           availabilityFields={[{ id: "1" }]}
           availability={availabilityValues}
           timezoneOptions={[{ value: "UTC", label: "UTC" }]}
@@ -394,5 +388,8 @@ describe("Profile Components Coverage", () => {
 
     await user.click(sunToggle);
     expect(sunToggle).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(sunToggle);
+    expect(sunToggle).toHaveAttribute("aria-pressed", "false");
   });
 });
