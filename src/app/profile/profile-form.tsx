@@ -306,11 +306,14 @@ export default function ProfileForm({
     control: form.control,
     name: "languages",
   });
-  const { fields: availabilityFields, append: appendAvailability, remove: removeAvailability } =
-    useFieldArray({
-      control: form.control,
-      name: "availability",
-    });
+  const {
+    fields: availabilityFields,
+    append: appendAvailability,
+    replace: replaceAvailability,
+  } = useFieldArray({
+    control: form.control,
+    name: "availability",
+  });
 
   const handleValue = useWatch({ control: form.control, name: "handle" });
   const watchedLanguages = useWatch({ control: form.control, name: "languages" });
@@ -577,10 +580,13 @@ export default function ProfileForm({
   };
 
   const onRemoveAvailability = (index: number) => {
-    if (availabilityFields.length <= 1) {
-      return;
-    }
-    removeAvailability(index);
+    const current = form.getValues("availability") ?? [];
+    const next = current.filter((_, slotIndex) => slotIndex !== index);
+    replaceAvailability(next);
+    form.setValue("availability", next, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   if (!isMounted) {

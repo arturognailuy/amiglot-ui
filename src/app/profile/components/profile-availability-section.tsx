@@ -46,7 +46,12 @@ export default function ProfileAvailabilitySection({
           <p className="text-sm text-destructive">{availabilityErrorMessage}</p>
         ) : null}
         <div className="space-y-4">
-          {availability.map((slot, index) => (
+          {availability.map((slot, index) => {
+            if (!slot) {
+              return null;
+            }
+            const weekdaysValue = slot.weekdays ?? [];
+            return (
             <div
               key={availabilityFields[index]?.id ?? `slot-${index}`}
               className="rounded-lg border border-border/60 p-4"
@@ -57,7 +62,7 @@ export default function ProfileAvailabilitySection({
                   <ToggleGroup
                     type="multiple"
                     variant="outline"
-                    value={slot.weekdays.map((day) => day.toString())}
+                    value={weekdaysValue.map((day) => day.toString())}
                     onValueChange={(values) => {
                       const weekdaysSelected = values
                         .map((value) => Number(value))
@@ -86,7 +91,7 @@ export default function ProfileAvailabilitySection({
                     <Input
                       type="time"
                       {...register(`availability.${index}.start_local_time`)}
-                      value={slot.start_local_time}
+                      value={slot.start_local_time ?? ""}
                     />
                   </div>
                   <div className="space-y-2">
@@ -94,7 +99,7 @@ export default function ProfileAvailabilitySection({
                     <Input
                       type="time"
                       {...register(`availability.${index}.end_local_time`)}
-                      value={slot.end_local_time}
+                      value={slot.end_local_time ?? ""}
                     />
                   </div>
                   <div className="space-y-2 min-w-0">
@@ -121,7 +126,8 @@ export default function ProfileAvailabilitySection({
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
         <Button type="button" variant="secondary" onClick={onAddAvailability}>
           {t("addAvailability")}
