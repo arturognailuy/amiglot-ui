@@ -83,7 +83,7 @@ export default function ProfileLanguageSection({
                     name={`languages.${index}.level`}
                     render={({ field }) => (
                       <Select
-                        value={field.value.toString()}
+                        value={field.value !== undefined && field.value !== null ? field.value.toString() : ""}
                         onValueChange={(value) => {
                           const nextLevel = Number(value);
                           setValue(`languages.${index}.level`, nextLevel, {
