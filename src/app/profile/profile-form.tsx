@@ -52,6 +52,77 @@ const DEFAULT_AVAILABILITY: AvailabilityDraft = {
   timezone: "",
 };
 
+const availabilityStorageKey = (userId: string) => `amiglot_availability_drafts:${userId}`;
+
+const buildAvailabilitySignature = (availability: AvailabilityPayload[], fallbackTimezone: string) =>
+  availability
+    .map((slot) =>
+      `${slot.weekday}|${slot.start_local_time}|${slot.end_local_time}|${slot.timezone?.trim() || fallbackTimezone}`,
+    )
+    .sort();
+
+const buildDraftSignature = (drafts: AvailabilityDraft[], fallbackTimezone: string) =>
+  drafts
+    .flatMap((slot) =>
+      slot.weekdays.map(
+        (weekday) =>
+          `${weekday}|${slot.start_local_time}|${slot.end_local_time}|${slot.timezone?.trim() || fallbackTimezone}`,
+      ),
+    )
+    .sort();
+
+const loadStoredAvailabilityDrafts = (
+  userId: string | null,
+  availability: AvailabilityPayload[],
+  fallbackTimezone: string,
+): AvailabilityDraft[] | null => {
+  if (!userId || typeof window === "undefined") {
+    return null;
+  }
+  const raw = window.localStorage.getItem(availabilityStorageKey(userId));
+  if (!raw) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(raw) as { drafts?: AvailabilityDraft[]; signature?: string[] };
+    if (!parsed?.drafts?.length || !parsed.signature?.length) {
+      return null;
+    }
+    const storedSignature = parsed.signature.slice().sort().join("|");
+    const currentSignature = buildAvailabilitySignature(availability, fallbackTimezone).join("|");
+    if (storedSignature != currentSignature) {
+      return null;
+    }
+    return parsed.drafts.map((slot) => ({
+      ...slot,
+      timezone: slot.timezone?.trim() || fallbackTimezone,
+      weekdays: [...slot.weekdays].sort(),
+    }));
+  } catch {
+    return null;
+  }
+};
+
+const storeAvailabilityDrafts = (
+  userId: string | null,
+  drafts: AvailabilityDraft[],
+  baselineSignature: string[],
+  fallbackTimezone: string,
+) => {
+  if (!userId || typeof window === "undefined") {
+    return;
+  }
+  const payload = {
+    drafts: drafts.map((slot) => ({
+      ...slot,
+      timezone: slot.timezone?.trim() || fallbackTimezone,
+      weekdays: [...slot.weekdays].sort(),
+    })),
+    signature: baselineSignature,
+  };
+  window.localStorage.setItem(availabilityStorageKey(userId), JSON.stringify(payload));
+};
+
 const getBrowserTimezone = () => {
   if (typeof Intl === "undefined" || typeof Intl.DateTimeFormat !== "function") {
     return "America/Vancouver";
@@ -164,8 +235,14 @@ const buildFormValues = (data: ProfileResponse, fallbackTimezone: string): Profi
       }))
     : [DEFAULT_LANGUAGE];
 
+  const storedAvailability = loadStoredAvailabilityDrafts(
+    data.user?.id ?? null,
+    data.availability,
+    resolvedTimezone,
+  );
   const availability = data.availability.length
-    ? (() => {
+    ? storedAvailability ??
+      (() => {
         const grouped = new Map<string, AvailabilityDraft>();
         data.availability.forEach((slot) => {
           const tz = slot.timezone?.trim() || resolvedTimezone;
@@ -275,11 +352,18 @@ export default function ProfileForm({
   const [email, setEmail] = useState(() => initialData?.user.email ?? "");
   const [discoverable, setDiscoverable] = useState<boolean | null>(() => initialData?.profile.discoverable ?? null);
   const [originalHandle, setOriginalHandle] = useState(() => initialData?.profile.handle ?? "");
+  const [availabilityBaseline, setAvailabilityBaseline] = useState<AvailabilityPayload[]>(
+    () => initialData?.availability ?? [],
+  );
   const [handleAvailability, setHandleAvailability] = useState<
     "idle" | "checking" | "available" | "unavailable"
   >("idle");
 
   const defaultTimezone = useMemo(() => getBrowserTimezone(), []);
+  const availabilityBaselineSignature = useMemo(
+    () => buildAvailabilitySignature(availabilityBaseline, defaultTimezone),
+    [availabilityBaseline, defaultTimezone],
+  );
 
   const defaultFormValues = useMemo(() => {
     if (initialFetched && initialData) {
@@ -439,6 +523,7 @@ export default function ProfileForm({
         setEmail(data.user.email ?? "");
         setOriginalHandle(data.profile.handle ?? "");
         setDiscoverable(data.profile.discoverable ?? null);
+        setAvailabilityBaseline(data.availability ?? []);
         setMessage(null);
         form.reset(buildFormValues(data, defaultTimezone));
       })
@@ -478,6 +563,28 @@ export default function ProfileForm({
     }
     void form.trigger("availability");
   }, [form, profileLoaded, availability]);
+
+  useEffect(() => {
+    if (!profileLoaded || !userId) {
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      storeAvailabilityDrafts(
+        userId,
+        availability,
+        availabilityBaselineSignature,
+        form.getValues("timezone")?.trim() || defaultTimezone,
+      );
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [
+    availability,
+    availabilityBaselineSignature,
+    defaultTimezone,
+    form,
+    profileLoaded,
+    userId,
+  ]);
 
   useEffect(() => {
     if (!token || !userId || handleValidity !== "valid" || !handleChanged) {
@@ -542,7 +649,15 @@ export default function ProfileForm({
         availability: expandAvailability(values),
       });
 
+      storeAvailabilityDrafts(
+        userId,
+        values.availability,
+        availabilityBaselineSignature,
+        values.timezone.trim() || defaultTimezone,
+      );
+
       const refreshed = await getJson<ProfileResponse>("/profile");
+      setAvailabilityBaseline(refreshed.availability ?? []);
       setDiscoverable(refreshed.profile.discoverable ?? null);
       setMessage(t("profileSaved"));
     } catch (error) {
@@ -700,6 +815,7 @@ export default function ProfileForm({
                   t={t}
                   control={form.control}
                   register={form.register}
+                  setValue={form.setValue}
                   languageOptions={languageOptions}
                   languageErrorMessage={languageErrorMessage}
                   proficiencyLabels={PROFICIENCY_LABELS}

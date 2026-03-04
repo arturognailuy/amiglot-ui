@@ -172,6 +172,7 @@ describe("Profile Components Coverage", () => {
           proficiencyLabels={{ 5: "Native" }}
           languageFields={[{ id: "1" }]}
           languages={methods.getValues("languages")}
+          setValue={methods.setValue}
           onAddLanguage={onAdd}
           onRemoveLanguage={onRemove}
           onNext={onNext}
@@ -214,6 +215,7 @@ describe("Profile Components Coverage", () => {
           proficiencyLabels={{}}
           languageFields={[]}
           languages={[]}
+          setValue={methods.setValue}
           onAddLanguage={() => {}}
           onRemoveLanguage={() => {}}
           onNext={() => {}}
@@ -253,6 +255,7 @@ describe("Profile Components Coverage", () => {
           proficiencyLabels={{ 4: "Advanced", 5: "Native" }}
           languageFields={[{ id: "1" }]}
           languages={languageValues}
+          setValue={methods.setValue}
           onAddLanguage={() => {}}
           onRemoveLanguage={() => {}}
           onNext={() => {}}
