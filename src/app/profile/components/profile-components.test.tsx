@@ -264,7 +264,7 @@ describe("Profile Components Coverage", () => {
     };
 
     render(<TestComponent />);
-    const selectTrigger = screen.getByLabelText("Language level");
+    const selectTrigger = screen.getByLabelText("levelLabel");
     expect(selectTrigger).toHaveTextContent("Native");
 
     const checkbox = screen.getByLabelText("targetLanguage") as HTMLInputElement;

@@ -711,7 +711,7 @@ describe("ProfileForm", () => {
     const languageSection = screen
       .getByRole("heading", { name: /languages/i })
       .closest("section");
-    const levelSelect = within(languageSection as HTMLElement).getAllByLabelText(/language level/i)[0];
+    const levelSelect = within(languageSection as HTMLElement).getAllByLabelText(/level/i)[0];
     await selectOption(user, levelSelect, "Advanced");
 
     expect(await screen.findByText(/at least one native language is required/i)).toBeInTheDocument();
