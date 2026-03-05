@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,7 @@ import { clearAccessToken, clearUserId, getAccessToken } from "@/lib/session";
 
 export default function HomeSession() {
   const t = useTranslations("home");
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    setToken(getAccessToken());
-  }, []);
+  const [token, setToken] = useState<string | null>(() => getAccessToken());
 
   const onSignOut = () => {
     clearAccessToken();
