@@ -97,7 +97,7 @@ export default function ProfileLanguageSection({
                           }
                         }}
                       >
-                        <SelectTrigger aria-label="Language level">
+                        <SelectTrigger aria-label={t("levelLabel")}>
                           <SelectValue placeholder={t("levelLabel")} />
                         </SelectTrigger>
                         <SelectContent>
