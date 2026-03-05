@@ -700,6 +700,7 @@ export default function ProfileForm({
                   t={t}
                   control={form.control}
                   register={form.register}
+                  setValue={form.setValue}
                   languageOptions={languageOptions}
                   languageErrorMessage={languageErrorMessage}
                   proficiencyLabels={PROFICIENCY_LABELS}
