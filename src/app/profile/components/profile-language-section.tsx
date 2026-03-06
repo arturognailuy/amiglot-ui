@@ -53,6 +53,19 @@ type SortableLanguageRowProps = {
   handleLabel: string;
 };
 
+
+export function resolveLanguageReorder(items: string[], activeId: string, overId?: string | null) {
+  if (!overId || activeId === overId) {
+    return null;
+  }
+  const fromIndex = items.indexOf(activeId);
+  const toIndex = items.indexOf(overId);
+  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+    return null;
+  }
+  return { fromIndex, toIndex };
+}
+
 function SortableLanguageRow({ id, children, handleLabel }: SortableLanguageRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
@@ -118,15 +131,15 @@ export default function ProfileLanguageSection({
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={({ active, over }) => {
-              if (!over || active.id === over.id) {
+              const reorder = resolveLanguageReorder(
+                items,
+                String(active.id),
+                over ? String(over.id) : null,
+              );
+              if (!reorder) {
                 return;
               }
-              const fromIndex = items.indexOf(String(active.id));
-              const toIndex = items.indexOf(String(over.id));
-              if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
-                return;
-              }
-              onMoveLanguage(fromIndex, toIndex);
+              onMoveLanguage(reorder.fromIndex, reorder.toIndex);
             }}
           >
             <SortableContext items={items} strategy={verticalListSortingStrategy}>

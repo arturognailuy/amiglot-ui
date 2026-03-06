@@ -153,7 +153,7 @@ const buildTimezoneOptions = (locale: string): Option[] => {
     });
 };
 
-const buildFormValues = (data: ProfileResponse, fallbackTimezone: string): ProfileFormValues => {
+export const buildFormValues = (data: ProfileResponse, fallbackTimezone: string): ProfileFormValues => {
   const resolvedTimezone = data.profile.timezone?.trim() || fallbackTimezone;
   const languages = data.languages.length
     ? (() => {
@@ -248,7 +248,7 @@ const buildFormValues = (data: ProfileResponse, fallbackTimezone: string): Profi
   };
 };
 
-const expandAvailability = (values: ProfileFormValues): AvailabilityPayload[] => {
+export const expandAvailability = (values: ProfileFormValues): AvailabilityPayload[] => {
   return values.availability.flatMap((slot, slotIndex) =>
     slot.weekdays.map((weekday) => ({
       weekday,

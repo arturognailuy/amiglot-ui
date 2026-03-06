@@ -8,12 +8,29 @@ import React from "react";
 
 import type { ProfileFormValues } from "../schema";
 
-import ProfileAvailabilitySection from "./profile-availability-section";
+import ProfileAvailabilitySection, { resolveAvailabilityReorder } from "./profile-availability-section";
 import ProfileDetailsSection from "./profile-details-section";
-import ProfileLanguageSection from "./profile-language-section";
+import ProfileLanguageSection, { resolveLanguageReorder } from "./profile-language-section";
 
 describe("Profile Components Coverage", () => {
   const t = (k: string) => k;
+
+  it("resolveLanguageReorder handles guard branches", () => {
+    const items = ["a", "b", "c"];
+    expect(resolveLanguageReorder(items, "a", null)).toBeNull();
+    expect(resolveLanguageReorder(items, "a", "a")).toBeNull();
+    expect(resolveLanguageReorder(items, "a", "missing")).toBeNull();
+    expect(resolveLanguageReorder(items, "a", "b")).toEqual({ fromIndex: 0, toIndex: 1 });
+  });
+
+  it("resolveAvailabilityReorder handles guard branches", () => {
+    const items = ["one", "two"];
+    expect(resolveAvailabilityReorder(items, "one", null)).toBeNull();
+    expect(resolveAvailabilityReorder(items, "one", "one")).toBeNull();
+    expect(resolveAvailabilityReorder(items, "missing", "one")).toBeNull();
+    expect(resolveAvailabilityReorder(items, "one", "two")).toEqual({ fromIndex: 0, toIndex: 1 });
+  });
+
 
   it("ProfileDetailsSection interaction", async () => {
     const onNext = vi.fn();
@@ -175,6 +192,7 @@ describe("Profile Components Coverage", () => {
           languages={methods.getValues("languages")}
           onAddLanguage={onAdd}
           onRemoveLanguage={onRemove}
+          onMoveLanguage={() => {}}
           onNext={onNext}
         />
       );
@@ -218,6 +236,7 @@ describe("Profile Components Coverage", () => {
           languages={[]}
           onAddLanguage={() => {}}
           onRemoveLanguage={() => {}}
+          onMoveLanguage={() => {}}
           onNext={() => {}}
         />
       );
@@ -258,6 +277,7 @@ describe("Profile Components Coverage", () => {
           languages={languageValues}
           onAddLanguage={() => {}}
           onRemoveLanguage={() => {}}
+          onMoveLanguage={() => {}}
           onNext={() => {}}
         />
       );
@@ -305,6 +325,7 @@ describe("Profile Components Coverage", () => {
           weekdays={["Sun", "Mon"]}
           onAddAvailability={onAdd}
           onRemoveAvailability={onRemove}
+          onMoveAvailability={() => {}}
         />
       );
     };
@@ -343,6 +364,7 @@ describe("Profile Components Coverage", () => {
           weekdays={[]}
           onAddAvailability={() => {}}
           onRemoveAvailability={() => {}}
+          onMoveAvailability={() => {}}
         />
       );
     };
@@ -381,6 +403,7 @@ describe("Profile Components Coverage", () => {
           weekdays={["Sun", "Mon"]}
           onAddAvailability={() => {}}
           onRemoveAvailability={() => {}}
+          onMoveAvailability={() => {}}
         />
       );
     };
