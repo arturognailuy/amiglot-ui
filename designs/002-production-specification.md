@@ -15,6 +15,12 @@ whenToUse: "Read when implementing or verifying product flows and acceptance cri
 - As a learner, I can manage my availability (days/time blocks + timezone) so the system can surface good overlaps.
 - As a learner, I can reorder my languages and availability slots and see that order preserved after saving and reloading.
 
+**Ordering & drag behavior**
+- Reordering is done via drag handles (pointer + keyboard) and updates immediately in the UI.
+- Order changes are **only persisted when the user clicks Save profile**.
+- If `order` is missing on load, the UI keeps the current list order and normalizes it on the next save.
+- Availability records that share the same `(start_local_time, end_local_time, timezone)` must share the same order so grouped slots stay stable.
+
 **Availability definition**
 - Users select availability in their **local timezone** (days/time blocks).
 - System stores **local time + timezone** per slot; matching converts to UTC for specific dates at query time (DST-safe).

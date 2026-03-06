@@ -147,6 +147,8 @@ Response:
 ```
 Notes:
 - Include a stable integer `order` per language item to preserve user-defined ordering.
+- UI sorts languages by `order` ascending; if missing, keep current list order and normalize on the next save.
+- Reordering changes are persisted only when the user clicks Save profile.
 
 ---
 ### 2.5 Availability
@@ -163,6 +165,8 @@ Response:
 Notes:
 - Include a stable integer `order` per availability record to preserve user-defined ordering.
 - Records that share the same `(start_local_time, end_local_time, timezone)` should also share the same `order` so the UI can group them deterministically.
+- UI sorts grouped slots by `order` ascending; if missing, keep current list order and normalize on the next save.
+- If the API returns inconsistent `order` values inside the same group, the UI uses the lowest order as the group order and normalizes by sending the shared order for all records in that group on the next save.
 
 ---
 ### 2.6 Discovery / Matching

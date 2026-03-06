@@ -124,6 +124,14 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 2. Leave language code empty.
 **Expected:** Errors shown for duplicates and missing code.
 
+### L4. Language ordering persistence
+**Setup:** Fresh account; complete A1.
+**Steps:**
+1. Add three languages.
+2. Drag to reorder (move the last to the top).
+3. Save profile and refresh the page.
+**Expected:** Language order matches the dragged order after reload.
+
 ## 7. Availability Tab Test Cases
 
 ### V1. Add/edit slot
@@ -152,6 +160,14 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 **Steps:**
 1. Remove the only slot.
 **Expected:** Validation prevents empty availability.
+
+### V5. Availability ordering persistence (grouped slots)
+**Setup:** Fresh account; complete A1.
+**Steps:**
+1. Create two grouped slots (each with multiple weekdays).
+2. Drag to reorder the grouped slots.
+3. Save profile and refresh the page.
+**Expected:** Grouped slots appear in the dragged order; weekdays sharing the same time range remain grouped together.
 
 ## 8. Internationalization (i18n) Test Cases
 
