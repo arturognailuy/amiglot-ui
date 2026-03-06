@@ -113,6 +113,30 @@ describe("api helpers", () => {
     await expect(getJson("/oops")).rejects.toThrow("Request failed (503)");
   });
 
+  it("throws ApiError for postJson failures", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: { message: "Bad request" } }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(postJson("/submit", { ok: false })).rejects.toThrow("Bad request");
+  });
+
+  it("throws ApiError for putJson failures with default message", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: async () => ({}),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(putJson("/update", { ok: false })).rejects.toThrow("Request failed (502)");
+  });
+
   it("supports postJson and putJson", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

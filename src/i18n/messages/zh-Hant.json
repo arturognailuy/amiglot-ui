@@ -63,7 +63,7 @@
     "sectionAvailabilityDescription": "分享你偏好的會話時段。",
     "handleLabel": "暱稱",
     "handleRequired": "暱稱為必填項。",
-    "handleInvalidCharacters": "暱稱只能包含字母和數字。",
+    "handleInvalidCharacters": "暱稱只能包含字母或數字。",
     "handleInvalidLength": "暱稱長度需為 3–20 個字元。",
     "handleInvalidLengthHelper": "暱稱需為 3–20 位字母或數字。",
     "handleAvailabilityChecking": "正在檢查可用性…",

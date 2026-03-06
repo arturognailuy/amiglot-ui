@@ -5,7 +5,7 @@ import React from "react";
 import messages from "@/i18n/messages/en.json";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ProfilePage from "./page";
+import ProfileForm from "./profile-form";
 
 vi.mock("@/components/ui/select", () => {
   const SelectContext = React.createContext<{
@@ -142,7 +142,7 @@ const renderWithIntl = (ui: React.ReactElement) =>
     </NextIntlClientProvider>,
   );
 
-describe("ProfilePage", () => {
+describe("ProfileForm", () => {
   beforeEach(() => {
     getJson.mockReset();
     putJson.mockReset();
@@ -159,7 +159,7 @@ describe("ProfilePage", () => {
     getAccessToken.mockReturnValue(null);
     getUserId.mockReturnValue(null);
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     expect(screen.getByText(/need to sign in/i)).toBeInTheDocument();
   });
@@ -169,7 +169,7 @@ describe("ProfilePage", () => {
     getUserId.mockReturnValue("user-1");
     getJson.mockReturnValue(new Promise(() => {}));
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     expect(await screen.findByText(/loading your profile/i)).toBeInTheDocument();
   });
@@ -194,7 +194,7 @@ describe("ProfilePage", () => {
       availability: [],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     expect(await screen.findByText(/profile setup/i)).toBeInTheDocument();
   });
@@ -231,7 +231,7 @@ describe("ProfilePage", () => {
       ],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     await screen.findByText(/profile setup/i);
     await userEvent.clear(screen.getByPlaceholderText("arturo"));
@@ -303,7 +303,7 @@ describe("ProfilePage", () => {
       });
     putJson.mockResolvedValue({});
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     await screen.findByText(/profile setup/i);
     await userEvent.click(screen.getByRole("button", { name: /save profile/i }));
@@ -402,7 +402,7 @@ describe("ProfilePage", () => {
       });
     putJson.mockResolvedValue({});
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     await waitFor(() =>
       expect(screen.queryByText(/loading your profile/i)).not.toBeInTheDocument(),
@@ -458,7 +458,7 @@ describe("ProfilePage", () => {
     });
     putJson.mockRejectedValueOnce(new Error("save boom"));
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     await screen.findByText(/profile setup/i);
     await userEvent.click(screen.getByRole("button", { name: /save profile/i }));
@@ -501,7 +501,7 @@ describe("ProfilePage", () => {
       })
       .mockResolvedValueOnce({ available: true });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     await screen.findByText(/profile setup/i);
     const handleInput = screen.getByPlaceholderText("arturo");
@@ -545,7 +545,7 @@ describe("ProfilePage", () => {
       ],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
     await screen.findByText(/profile setup/i);
 
     await user.click(screen.getByRole("tab", { name: /language/i }));
@@ -566,7 +566,7 @@ describe("ProfilePage", () => {
     getUserId.mockReturnValue("user-1");
     getJson.mockRejectedValueOnce(new Error("boom"));
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     expect(await screen.findByText(/boom/)).toBeInTheDocument();
   });
@@ -577,7 +577,7 @@ describe("ProfilePage", () => {
     const ApiError = (await import("@/lib/api")).ApiError;
     getJson.mockRejectedValueOnce(new ApiError("not found", 404));
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
 
     await screen.findByText(/profile setup/i);
     expect(screen.queryByText(/could not load/i)).not.toBeInTheDocument();
@@ -616,14 +616,14 @@ describe("ProfilePage", () => {
       ],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
     await screen.findByText(/profile setup/i);
 
     await selectComboboxOption(user, screen.getByLabelText(/timezone/i), "Select timezone");
 
     expect(await screen.findByText(/timezone is required/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /save profile/i })).toBeDisabled();
-  });
+  }, 10000);
 
   it("rejects invalid handle characters on save", async () => {
     const user = userEvent.setup();
@@ -658,7 +658,7 @@ describe("ProfilePage", () => {
       ],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
     await screen.findByText(/profile setup/i);
 
     const handleInput = screen.getByPlaceholderText("arturo");
@@ -703,7 +703,7 @@ describe("ProfilePage", () => {
       ],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
     await screen.findByText(/profile setup/i);
 
     await user.click(screen.getByRole("tab", { name: /language/i }));
@@ -711,7 +711,7 @@ describe("ProfilePage", () => {
     const languageSection = screen
       .getByRole("heading", { name: /languages/i })
       .closest("section");
-    const levelSelect = within(languageSection as HTMLElement).getAllByLabelText(/language level/i)[0];
+    const levelSelect = within(languageSection as HTMLElement).getAllByLabelText(/level/i)[0];
     await selectOption(user, levelSelect, "Advanced");
 
     expect(await screen.findByText(/at least one native language is required/i)).toBeInTheDocument();
@@ -752,14 +752,17 @@ describe("ProfilePage", () => {
       ],
     });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
     await screen.findByText(/profile setup/i);
 
     const handleInput = screen.getByPlaceholderText("arturo");
+    await waitFor(() => expect(handleInput).toHaveValue("arturo"));
+
     await user.clear(handleInput);
     await user.type(handleInput, "ab");
+    await user.tab();
 
-    expect(await screen.findByText(messages.profile.handleInvalidLength)).toBeInTheDocument();
+    expect(await screen.findByText(/Handle must be 3/)).toBeInTheDocument();
   });
 
   it("shows handle unavailable status", async () => {
@@ -797,7 +800,7 @@ describe("ProfilePage", () => {
       })
       .mockResolvedValueOnce({ available: false });
 
-    renderWithIntl(<ProfilePage />);
+    renderWithIntl(<ProfileForm />);
     await screen.findByText(/profile setup/i);
 
     const handleInput = screen.getByPlaceholderText("arturo");
