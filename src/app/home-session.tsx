@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -11,24 +11,43 @@ import type { ProfileResponse } from "@/app/profile/profile-types";
 
 export default function HomeSession() {
   const t = useTranslations("home");
-  const [token, setToken] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+
+  const token = useSyncExternalStore(
+    (callback) => {
+      if (typeof window === "undefined") {
+        return () => undefined;
+      }
+      window.addEventListener("storage", callback);
+      return () => window.removeEventListener("storage", callback);
+    },
+    () => getAccessToken(),
+    () => null,
+  );
+
+  const userId = useSyncExternalStore(
+    (callback) => {
+      if (typeof window === "undefined") {
+        return () => undefined;
+      }
+      window.addEventListener("storage", callback);
+      return () => window.removeEventListener("storage", callback);
+    },
+    () => getUserId(),
+    () => null,
+  );
+
+  const isMounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
 
   const onSignOut = () => {
     clearAccessToken();
     clearUserId();
-    setToken(null);
-    setUserId(null);
     setProfileComplete(null);
   };
-
-  useEffect(() => {
-    setToken(getAccessToken());
-    setUserId(getUserId());
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!token || !userId) {
