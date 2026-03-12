@@ -30,7 +30,7 @@ type ProfileAvailabilitySectionProps = {
   control: Control<ProfileFormValues>;
   register: UseFormRegister<ProfileFormValues>;
 
-  availabilityFields: any[];
+  availabilityFields: AvailabilityField[];
   availability: ProfileFormValues["availability"];
   availabilityErrorMessage?: string;
   timezoneOptions: SelectOption[];
@@ -45,6 +45,8 @@ type SortableAvailabilityRowProps = {
   children: ReactNode;
   handleLabel: string;
 };
+
+type AvailabilityField = { id: string } & Partial<ProfileFormValues["availability"][number]>;
 
 
 export function resolveAvailabilityReorder(items: string[], activeId: string, overId?: string | null) {
@@ -185,7 +187,7 @@ export default function ProfileAvailabilitySection({
                             id={startId}
                             type="time"
                             {...register(`availability.${index}.start_local_time`)}
-                            defaultValue={(field as any).start_local_time ?? ""}
+                            defaultValue={field.start_local_time ?? ""}
                           />
                         </div>
                         <div className="space-y-2">
@@ -194,7 +196,7 @@ export default function ProfileAvailabilitySection({
                             id={endId}
                             type="time"
                             {...register(`availability.${index}.end_local_time`)}
-                            defaultValue={(field as any).end_local_time ?? ""}
+                            defaultValue={field.end_local_time ?? ""}
                           />
                         </div>
                         <div className="space-y-2 min-w-0">
