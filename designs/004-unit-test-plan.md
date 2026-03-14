@@ -30,6 +30,10 @@ Establish a unit testing baseline for the UI repo and outline the priority areas
 - **Profile page (state transitions)**:
   - Tabs show validation indicators when invalid.
   - Save disabled when validation fails.
+- **Profile page (ordering)**:
+  - Reordering languages updates form state ordering deterministically.
+  - Availability groups share a single order value and normalize on save if inconsistent.
+  - Reordering is reflected in the save payload only when Save is triggered.
 - **i18n helpers**:
   - Locale resolution helpers (`src/i18n/locale.ts`).
   - Language option builders (`src/i18n/language-options.ts`).
