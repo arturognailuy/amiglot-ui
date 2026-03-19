@@ -40,12 +40,20 @@ export default async function RootLayout({
           <div className="flex min-h-screen flex-col">
             <header className="border-b border-border/60 bg-background/80 px-4 py-3 shadow-sm backdrop-blur">
               <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
                 <Link
                   href="/"
                   className="text-sm font-semibold uppercase tracking-wide"
                 >
                   {t("brand")}
                 </Link>
+                <Link
+                  href="/dashboard"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t("discover")}
+                </Link>
+              </div>
                 <LanguageSwitcher />
               </div>
             </header>
