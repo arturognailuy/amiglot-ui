@@ -89,7 +89,7 @@ function OverlapDisplay({
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium text-muted-foreground">
-        🕐 {cardT("yourTime")}
+        🕐 {cardT("card.yourTime")}
       </p>
       <div className="space-y-0.5 text-sm">
         {slots.map((s, i) => {
