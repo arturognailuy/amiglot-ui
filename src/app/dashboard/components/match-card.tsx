@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { MatchItem, MatchLanguage, OverlapSlot } from "../discovery-types";
 
 const LEVEL_KEYS = ["zero", "beginner", "elementary", "intermediate", "advanced", "native"] as const;
@@ -41,7 +47,6 @@ function formatOverlap(minutes: number, t: ReturnType<typeof useTranslations>): 
 }
 
 function formatSlotTime(utcTime: string, weekday: number): string {
-  // Parse HH:MM and create a Date for the next occurrence of that weekday
   const [h, m] = utcTime.split(":").map(Number);
   const now = new Date();
   const dayDiff = ((weekday - now.getUTCDay()) + 7) % 7;
@@ -49,14 +54,33 @@ function formatSlotTime(utcTime: string, weekday: number): string {
   return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="ml-1 inline-flex cursor-help text-muted-foreground hover:text-foreground">
+          ⓘ
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="max-w-xs text-sm">{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function LanguageList({
   label,
   languages,
   levelT,
+  cardT,
+  isTeachYou,
 }: {
   label: string;
   languages: MatchLanguage[];
   levelT: ReturnType<typeof useTranslations>;
+  cardT: ReturnType<typeof useTranslations>;
+  isTeachYou: boolean;
 }) {
   if (languages.length === 0) return null;
   return (
@@ -64,10 +88,22 @@ function LanguageList({
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <div className="flex flex-wrap gap-2">
         {languages.map((l) => {
-          const levelKey = LEVEL_KEYS[l.level] ?? "zero";
+          const teacherLevelKey = LEVEL_KEYS[l.level] ?? "zero";
+          const learnerLevelKey = LEVEL_KEYS[l.learner_level] ?? "zero";
+          const teacherLabel = cardT("card.teacherLevel", { level: levelT(teacherLevelKey) });
+          const learnerLabel = cardT("card.learnerLevel", { level: levelT(learnerLevelKey) });
           return (
             <Badge key={l.language_code} variant="secondary">
-              {l.language_code} · {levelT(levelKey)}
+              {l.language_code}
+              {isTeachYou ? (
+                <span className="ml-1 text-xs opacity-75">
+                  ({teacherLabel} · {learnerLabel})
+                </span>
+              ) : (
+                <span className="ml-1 text-xs opacity-75">
+                  ({teacherLabel} · {learnerLabel})
+                </span>
+              )}
             </Badge>
           );
         })}
@@ -90,6 +126,7 @@ function OverlapDisplay({
     <div className="space-y-1">
       <p className="text-sm font-medium text-muted-foreground">
         🕐 {cardT("card.yourTime")}
+        <InfoTooltip text={cardT("card.yourTimeTooltip")} />
       </p>
       <div className="space-y-0.5 text-sm">
         {slots.map((s, i) => {
@@ -139,52 +176,59 @@ export default function MatchCard({ match }: Props) {
     .join(" · ");
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">{subtitle}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          🕐 {formatOverlap(match.total_overlap_minutes, t)}
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <LanguageList
-          label={`🎓 ${t("card.theyTeachYou")}`}
-          languages={match.mutual_teach}
-          levelT={levelT}
-        />
-        <LanguageList
-          label={`📚 ${t("card.youTeachThem")}`}
-          languages={match.mutual_learn}
-          levelT={levelT}
-        />
-        {match.bridge_languages.length > 0 && (
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">
-              🌉 {t("card.bridgeLanguage")}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {match.bridge_languages.map((b) => (
-                <Badge key={b.language_code} variant="outline">
-                  {b.language_code}
-                </Badge>
-              ))}
+    <TooltipProvider>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{subtitle}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            🕐 {formatOverlap(match.total_overlap_minutes, t)}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <LanguageList
+            label={`🎓 ${t("card.theyTeachYou")}`}
+            languages={match.mutual_teach}
+            levelT={levelT}
+            cardT={t}
+            isTeachYou={true}
+          />
+          <LanguageList
+            label={`📚 ${t("card.youTeachThem")}`}
+            languages={match.mutual_learn}
+            levelT={levelT}
+            cardT={t}
+            isTeachYou={false}
+          />
+          {match.bridge_languages.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">
+                🌉 {t("card.bridgeLanguage")}
+                <InfoTooltip text={t("card.bridgeTooltip")} />
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {match.bridge_languages.map((b) => (
+                  <Badge key={b.language_code} variant="outline">
+                    {b.language_code}
+                  </Badge>
+                ))}
+              </div>
             </div>
+          )}
+          <OverlapDisplay
+            slots={match.availability_overlap}
+            weekdayT={weekdayT}
+            cardT={t}
+          />
+          <div className="flex gap-2 pt-2">
+            <Button size="sm" variant="outline" disabled>
+              {t("card.viewProfile")}
+            </Button>
+            <Button size="sm" disabled>
+              {t("card.sendRequest")}
+            </Button>
           </div>
-        )}
-        <OverlapDisplay
-          slots={match.availability_overlap}
-          weekdayT={weekdayT}
-          cardT={t}
-        />
-        <div className="flex gap-2 pt-2">
-          <Button size="sm" variant="outline" disabled>
-            {t("card.viewProfile")}
-          </Button>
-          <Button size="sm" disabled>
-            {t("card.sendRequest")}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 }

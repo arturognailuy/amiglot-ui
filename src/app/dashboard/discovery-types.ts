@@ -2,6 +2,7 @@ export type MatchLanguage = {
   language_code: string;
   level: number;
   is_native: boolean;
+  learner_level: number;
 };
 
 export type BridgeLanguage = {
