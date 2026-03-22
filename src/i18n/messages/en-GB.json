@@ -1,7 +1,8 @@
 {
   "nav": {
     "brand": "Amiglot",
-    "language": "Language"
+    "language": "Language",
+    "discover": "Discover"
   },
   "home": {
     "title": "Amiglot",
@@ -12,7 +13,8 @@
     "profileComplete": "Profile complete",
     "signOut": "Sign out",
     "signedOut": "You're not signed in yet.",
-    "signIn": "Sign in with magic link"
+    "signIn": "Sign in with magic link",
+    "discoverPartners": "Discover Partners"
   },
   "login": {
     "title": "Sign in",
@@ -146,5 +148,36 @@
       "saturday": "Saturday"
     },
     "reorderHandleLabel": "Drag to reorder"
+  },
+  "dashboard": {
+    "title": "Discover Partners",
+    "loading": "Finding matches...",
+    "loadMore": "Load more",
+    "noMoreResults": "No more results",
+    "retry": "Retry",
+    "signIn": "Sign in",
+    "empty": {
+      "title": "No matches found yet",
+      "description": "Try updating your profile with more languages or adjusting your availability to find partners.",
+      "editProfile": "Edit Profile"
+    },
+    "errors": {
+      "profileIncomplete": "Complete your profile to discover partners.",
+      "noTargetLanguages": "Add languages you want to learn to find matches.",
+      "networkError": "Something went wrong. Please try again."
+    },
+    "card": {
+      "theyTeachYou": "They teach you",
+      "youTeachThem": "You teach them",
+      "bridgeLanguage": "Bridge",
+      "overlapTime": "{minutes}min/week overlap",
+      "overlapHours": "{hours}h/week overlap",
+      "viewProfile": "View Profile",
+      "sendRequest": "Send Request",
+      "yourTime": "Available Times",
+      "bridgeTooltip": "A shared language you both speak well enough to communicate in while learning",
+      "yourTimeTooltip": "Matched time slots shown in your local timezone",
+      "levelPair": "{teacher} → {learner}"
+    }
   }
 }

@@ -1,7 +1,8 @@
 {
   "nav": {
     "brand": "Amiglot",
-    "language": "Idioma"
+    "language": "Idioma",
+    "discover": "Descobrir"
   },
   "home": {
     "title": "Amiglot",
@@ -12,7 +13,8 @@
     "profileComplete": "Perfil completo",
     "signOut": "Terminar sessão",
     "signedOut": "Ainda não iniciou sessão.",
-    "signIn": "Iniciar sessão com link mágico"
+    "signIn": "Iniciar sessão com link mágico",
+    "discoverPartners": "Descobrir Parceiros"
   },
   "login": {
     "title": "Iniciar sessão",
@@ -146,5 +148,36 @@
       "saturday": "Sábado"
     },
     "reorderHandleLabel": "Drag to reorder"
+  },
+  "dashboard": {
+    "title": "Descobrir Parceiros",
+    "loading": "Buscando parceiros...",
+    "loadMore": "Carregar mais",
+    "noMoreResults": "Sem mais resultados",
+    "retry": "Tentar novamente",
+    "signIn": "Entrar",
+    "empty": {
+      "title": "Nenhum parceiro encontrado",
+      "description": "Tente atualizar seu perfil com mais idiomas ou ajustar sua disponibilidade para encontrar parceiros.",
+      "editProfile": "Editar Perfil"
+    },
+    "errors": {
+      "profileIncomplete": "Complete seu perfil para descobrir parceiros.",
+      "noTargetLanguages": "Adicione idiomas que deseja aprender para encontrar parceiros.",
+      "networkError": "Algo deu errado. Tente novamente."
+    },
+    "card": {
+      "theyTeachYou": "Eles ensinam você",
+      "youTeachThem": "Você ensina eles",
+      "bridgeLanguage": "Idioma ponte",
+      "overlapTime": "{minutes}min/semana de sobreposição",
+      "overlapHours": "{hours}h/semana de sobreposição",
+      "viewProfile": "Ver Perfil",
+      "sendRequest": "Enviar Solicitação",
+      "yourTime": "Horários Disponíveis",
+      "bridgeTooltip": "Um idioma que vocês dois falam bem o suficiente para se comunicar enquanto aprendem",
+      "yourTimeTooltip": "Horários compatíveis exibidos no seu fuso horário",
+      "levelPair": "{teacher} → {learner}"
+    }
   }
 }

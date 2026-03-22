@@ -82,10 +82,10 @@ Each Match Card shows:
 │  🇲🇽  @maria  · 24 · Mexico          │
 │                                      │
 │  🎓 They teach you:                  │
-│     Spanish (Native)                 │
+│     Spanish (Native → Advanced)      │
 │                                      │
 │  📚 You teach them:                  │
-│     English (Advanced)               │
+│     English (Advanced → Beginner)    │
 │                                      │
 │  🌉 Bridge: English                  │
 │                                      │
@@ -180,7 +180,10 @@ All new strings must be added to locale files. Required keys:
       "overlapHours": "{hours}h overlap",
       "viewProfile": "View Profile",
       "sendRequest": "Send Request",
-      "yourTime": "your time"
+      "yourTime": "Available Times",
+      "bridgeTooltip": "A shared language you both speak well enough to communicate in while learning",
+      "yourTimeTooltip": "Matched time slots shown in your local timezone",
+      "levelPair": "{teacher} → {learner}"
     }
   }
 }

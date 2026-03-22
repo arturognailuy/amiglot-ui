@@ -203,7 +203,158 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 3. Restart the API server after the test.
 **Expected:** Error banner shown; inputs preserved.
 
-## 10. Regression Checklist
+## 10. Discovery & Matching (Dashboard) Test Cases
+
+### D1. Dashboard loads with matches
+**Setup:** Two accounts — User A (teaches English native, targets Chinese, has availability) and User B (teaches Chinese native, targets English, overlapping availability). Both profiles complete and discoverable.
+**Steps:**
+1. Sign in as User A.
+2. Navigate to Dashboard (`/dashboard`).
+3. Wait for loading skeletons to resolve.
+**Expected:** At least one match card appears showing User B's handle, country, mutual languages (they teach you / you teach them), bridge language, and availability overlap converted to User A's local timezone.
+
+### D2. Dashboard empty state
+**Setup:** User A with a target language that no other user teaches.
+**Steps:**
+1. Sign in as User A.
+2. Navigate to Dashboard.
+**Expected:** Empty state is displayed with localized "No matches found yet" message and an "Edit Profile" link.
+
+### D3. Dashboard — profile incomplete redirect
+**Setup:** Fresh account with no profile saved.
+**Steps:**
+1. Sign in and navigate to Dashboard.
+**Expected:** Redirected to Profile page (or login) with a toast/message: "Complete your profile to discover partners."
+
+### D4. Dashboard — no target languages
+**Setup:** User with profile saved but only native languages (no targets).
+**Steps:**
+1. Sign in and navigate to Dashboard.
+**Expected:** Inline message: "Add languages you want to learn to find matches" with a link to Profile.
+
+### D5. Match card displays all mutual languages
+**Setup:** User A targets `zh` and `pt`; User B speaks `zh-Hans` (native) and `pt-BR` (level 5), targets English. Both have bridge + overlap.
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+**Expected:** User B's card shows both `zh-Hans` and `pt-BR` under "They teach you" section.
+
+### D6. Base-language matching in UI
+**Setup:** User A targets `zh`; User B speaks `zh-Hans` (native). Both have bridge + overlap.
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+**Expected:** User B appears as a match; no MISSING_MESSAGE errors in console.
+
+### D7. Availability overlap displayed in local time
+**Setup:** User A (timezone `America/Vancouver`) and User B overlap on Mon 18:00–20:00 UTC.
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+**Expected:** Overlap displayed as "Mon 10:00–12:00" (or equivalent PST/PDT conversion) with "(your time)" label.
+
+### D8. Load More pagination
+**Setup:** Enough matching users for User A to span multiple pages (or use a small page size).
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+2. Scroll to bottom and click "Load More".
+**Expected:** Additional match cards appended; no duplicates. "Load More" hidden when no more results.
+
+### D9. Dashboard i18n — Portuguese locale
+**Steps:**
+1. Switch locale to `pt-BR`.
+2. Navigate to Dashboard.
+**Expected:** All labels ("Discover Partners", "They teach you", "your time", etc.) are in Portuguese. No MISSING_MESSAGE errors.
+
+### D10. Dashboard i18n — Chinese locale
+**Steps:**
+1. Switch locale to `zh` or `zh-Hans`.
+2. Navigate to Dashboard.
+**Expected:** All labels are in Chinese. No MISSING_MESSAGE errors.
+
+### D11. Dashboard network error
+**Setup:** Simulate API failure (e.g., stop API or mock 500).
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Error message with retry button; localized error text.
+
+### D12. Level pair display — compact format
+**Setup:** Seed DB (`db/seeds/seed_test_profiles.sql` in amiglot-api). Sign in as Alice (test+seed1@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+2. Inspect a match card (e.g., Bob's card).
+**Expected:** Language badges show compact level pair format, e.g., `zh (Native → Elementary)` — not the verbose "teaches at Native · learns at Advanced" format. Arrow separates teacher level from learner level.
+
+### D13. Multi-language match card
+**Setup:** Seed DB. Sign in as Kevin (test+seed11@gnailuy.com) who targets both `zh` and `pt`.
+**Steps:**
+1. Navigate to Dashboard.
+2. Find Luna's card.
+**Expected:** Luna's card shows both `pt-BR` and `zh-Hans` under "They teach you", each with level pairs. "You teach them" shows `en` with Kevin's native level → Luna's learner level.
+
+### D14. Three-way language exchange visibility
+**Setup:** Seed DB. Sign in as Carlos (test+seed3@gnailuy.com) who speaks pt-BR + es native, en intermediate, targets en + zh.
+**Steps:**
+1. Navigate to Dashboard.
+2. Verify Diana's card appears (en↔pt exchange with en as bridge).
+3. Verify Kevin's card appears (targets pt, bridge en).
+**Expected:** Both matches visible. Diana's card: "They teach you: en (Native → Intermediate)", "You teach them: pt-BR (Native → Beginner)". Kevin's card similar with correct levels.
+
+### D15. Blocked user not shown
+**Setup:** Seed DB. Sign in as Bob (test+seed2@gnailuy.com) who has blocked Ivan.
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Ivan does NOT appear in results. Alice, Frank, Kevin, and other valid matches appear.
+
+### D16. Non-discoverable user hidden
+**Setup:** Seed DB. Sign in as Alice (test+seed1@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Julia (test+seed10, discoverable=false) does NOT appear even though her languages and availability would match.
+
+### D17. No availability overlap — no match
+**Setup:** Seed DB. Sign in as Alice (test+seed1@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Eve (test+seed5) does NOT appear — same language match as Bob but zero availability overlap.
+
+### D18. Minimal overlap threshold
+**Setup:** Seed DB. Sign in as Bob (test+seed2@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+2. Find Frank's card.
+**Expected:** Frank appears (65 min overlap, just above the 60-min threshold). Overlap shows approximately "1h/week overlap".
+
+### D19. Rare language — empty results
+**Setup:** Seed DB. Sign in as Hiro (test+seed8@gnailuy.com) who targets Korean.
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Empty state — "No matches found yet" — because no seeded user teaches Korean at level ≥ 4.
+
+### D20. Base-language match with seed data
+**Setup:** Seed DB. Sign in as Alice (test+seed1@gnailuy.com) who targets `zh`.
+**Steps:**
+1. Navigate to Dashboard.
+2. Find Grace's card.
+**Expected:** Grace (speaks `zh-Hans` native) appears as a match for Alice's `zh` target via base-language matching. Card shows `zh-Hans` under "They teach you".
+
+### D21. Country flag and age display
+**Setup:** Seed DB. Sign in as Alice.
+**Steps:**
+1. Navigate to Dashboard.
+2. Inspect Bob's card header.
+**Expected:** Card header shows 🇨🇳 flag, `@bob`, age (calculated from birth_year 1992), and "China" as country name.
+
+## 10.1 Test Data Setup
+
+For scenarios D12–D21, use the seed script in the API repo:
+
+```bash
+psql -f /path/to/amiglot-api/db/seeds/seed_test_profiles.sql
+```
+
+This script is idempotent — it cleans previous seed data before inserting. It creates 12 test users covering: basic mutual match, multi-language, bridge-only, no overlap, minimal overlap, base-language matching, blocked pairs, non-discoverable users, and rare languages with no matches.
+
+See the comment block at the end of `seed_test_profiles.sql` for the full expected match matrix.
+
+## 11. Regression Checklist
 - No console errors on Home, Login, Verify, Profile.
 - Forms remain responsive during normal use.
 - Navigation between tabs does not reset inputs unexpectedly.

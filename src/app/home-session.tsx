@@ -84,7 +84,12 @@ export default function HomeSession() {
       <div className="flex flex-col items-center gap-4">
         <p className="text-sm text-muted-foreground">{t("signedIn")}</p>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <Button asChild className="rounded-full">
+          {profileComplete && (
+            <Button asChild className="rounded-full">
+              <Link href="/dashboard">{t("discoverPartners")}</Link>
+            </Button>
+          )}
+          <Button asChild className={profileComplete ? "rounded-full" : "rounded-full"} variant={profileComplete ? "outline" : "default"}>
             <Link href="/profile">{profileLabel}</Link>
           </Button>
           <Button

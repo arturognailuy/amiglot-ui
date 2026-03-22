@@ -1,7 +1,8 @@
 {
   "nav": {
     "brand": "Amiglot",
-    "language": "语言"
+    "language": "语言",
+    "discover": "发现"
   },
   "home": {
     "title": "Amiglot",
@@ -12,7 +13,8 @@
     "profileComplete": "资料已完成",
     "signOut": "退出登录",
     "signedOut": "你还未登录。",
-    "signIn": "通过魔法链接登录"
+    "signIn": "通过魔法链接登录",
+    "discoverPartners": "发现伙伴"
   },
   "login": {
     "title": "登录",
@@ -146,5 +148,36 @@
       "saturday": "星期六"
     },
     "reorderHandleLabel": "Drag to reorder"
+  },
+  "dashboard": {
+    "title": "发现伙伴",
+    "loading": "正在寻找匹配...",
+    "loadMore": "加载更多",
+    "noMoreResults": "没有更多结果",
+    "retry": "重试",
+    "signIn": "登录",
+    "empty": {
+      "title": "暂无匹配结果",
+      "description": "尝试更新您的个人资料，添加更多语言或调整可用时间来找到伙伴。",
+      "editProfile": "编辑个人资料"
+    },
+    "errors": {
+      "profileIncomplete": "请先完善个人资料再搜索伙伴。",
+      "noTargetLanguages": "请添加想要学习的语言来查找匹配。",
+      "networkError": "出了点问题，请重试。"
+    },
+    "card": {
+      "theyTeachYou": "对方教你",
+      "youTeachThem": "你教对方",
+      "bridgeLanguage": "桥梁语言",
+      "overlapTime": "每周{minutes}分钟重叠",
+      "overlapHours": "每周{hours}小时重叠",
+      "viewProfile": "查看个人资料",
+      "sendRequest": "发送请求",
+      "yourTime": "可用时段",
+      "bridgeTooltip": "双方都能流利使用的共同语言，便于学习过程中的交流",
+      "yourTimeTooltip": "匹配的时段已按照你的本地时区显示",
+      "levelPair": "{teacher} → {learner}"
+    }
   }
 }
