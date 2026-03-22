@@ -203,7 +203,79 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 3. Restart the API server after the test.
 **Expected:** Error banner shown; inputs preserved.
 
-## 10. Regression Checklist
+## 10. Discovery & Matching (Dashboard) Test Cases
+
+### D1. Dashboard loads with matches
+**Setup:** Two accounts — User A (teaches English native, targets Chinese, has availability) and User B (teaches Chinese native, targets English, overlapping availability). Both profiles complete and discoverable.
+**Steps:**
+1. Sign in as User A.
+2. Navigate to Dashboard (`/dashboard`).
+3. Wait for loading skeletons to resolve.
+**Expected:** At least one match card appears showing User B's handle, country, mutual languages (they teach you / you teach them), bridge language, and availability overlap converted to User A's local timezone.
+
+### D2. Dashboard empty state
+**Setup:** User A with a target language that no other user teaches.
+**Steps:**
+1. Sign in as User A.
+2. Navigate to Dashboard.
+**Expected:** Empty state is displayed with localized "No matches found yet" message and an "Edit Profile" link.
+
+### D3. Dashboard — profile incomplete redirect
+**Setup:** Fresh account with no profile saved.
+**Steps:**
+1. Sign in and navigate to Dashboard.
+**Expected:** Redirected to Profile page (or login) with a toast/message: "Complete your profile to discover partners."
+
+### D4. Dashboard — no target languages
+**Setup:** User with profile saved but only native languages (no targets).
+**Steps:**
+1. Sign in and navigate to Dashboard.
+**Expected:** Inline message: "Add languages you want to learn to find matches" with a link to Profile.
+
+### D5. Match card displays all mutual languages
+**Setup:** User A targets `zh` and `pt`; User B speaks `zh-Hans` (native) and `pt-BR` (level 5), targets English. Both have bridge + overlap.
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+**Expected:** User B's card shows both `zh-Hans` and `pt-BR` under "They teach you" section.
+
+### D6. Base-language matching in UI
+**Setup:** User A targets `zh`; User B speaks `zh-Hans` (native). Both have bridge + overlap.
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+**Expected:** User B appears as a match; no MISSING_MESSAGE errors in console.
+
+### D7. Availability overlap displayed in local time
+**Setup:** User A (timezone `America/Vancouver`) and User B overlap on Mon 18:00–20:00 UTC.
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+**Expected:** Overlap displayed as "Mon 10:00–12:00" (or equivalent PST/PDT conversion) with "(your time)" label.
+
+### D8. Load More pagination
+**Setup:** Enough matching users for User A to span multiple pages (or use a small page size).
+**Steps:**
+1. Sign in as User A and navigate to Dashboard.
+2. Scroll to bottom and click "Load More".
+**Expected:** Additional match cards appended; no duplicates. "Load More" hidden when no more results.
+
+### D9. Dashboard i18n — Portuguese locale
+**Steps:**
+1. Switch locale to `pt-BR`.
+2. Navigate to Dashboard.
+**Expected:** All labels ("Discover Partners", "They teach you", "your time", etc.) are in Portuguese. No MISSING_MESSAGE errors.
+
+### D10. Dashboard i18n — Chinese locale
+**Steps:**
+1. Switch locale to `zh` or `zh-Hans`.
+2. Navigate to Dashboard.
+**Expected:** All labels are in Chinese. No MISSING_MESSAGE errors.
+
+### D11. Dashboard network error
+**Setup:** Simulate API failure (e.g., stop API or mock 500).
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Error message with retry button; localized error text.
+
+## 11. Regression Checklist
 - No console errors on Home, Login, Verify, Profile.
 - Forms remain responsive during normal use.
 - Navigation between tabs does not reset inputs unexpectedly.
