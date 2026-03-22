@@ -74,13 +74,11 @@ function LanguageList({
   languages,
   levelT,
   cardT,
-  isTeachYou,
 }: {
   label: string;
   languages: MatchLanguage[];
   levelT: ReturnType<typeof useTranslations>;
   cardT: ReturnType<typeof useTranslations>;
-  isTeachYou: boolean;
 }) {
   if (languages.length === 0) return null;
   return (
@@ -90,20 +88,16 @@ function LanguageList({
         {languages.map((l) => {
           const teacherLevelKey = LEVEL_KEYS[l.level] ?? "zero";
           const learnerLevelKey = LEVEL_KEYS[l.learner_level] ?? "zero";
-          const teacherLabel = cardT("card.teacherLevel", { level: levelT(teacherLevelKey) });
-          const learnerLabel = cardT("card.learnerLevel", { level: levelT(learnerLevelKey) });
+          const levelPair = cardT("card.levelPair", {
+            teacher: levelT(teacherLevelKey),
+            learner: levelT(learnerLevelKey),
+          });
           return (
             <Badge key={l.language_code} variant="secondary">
               {l.language_code}
-              {isTeachYou ? (
-                <span className="ml-1 text-xs opacity-75">
-                  ({teacherLabel} · {learnerLabel})
-                </span>
-              ) : (
-                <span className="ml-1 text-xs opacity-75">
-                  ({teacherLabel} · {learnerLabel})
-                </span>
-              )}
+              <span className="ml-1 text-xs opacity-75">
+                ({levelPair})
+              </span>
             </Badge>
           );
         })}
@@ -190,14 +184,12 @@ export default function MatchCard({ match }: Props) {
             languages={match.mutual_teach}
             levelT={levelT}
             cardT={t}
-            isTeachYou={true}
           />
           <LanguageList
             label={`📚 ${t("card.youTeachThem")}`}
             languages={match.mutual_learn}
             levelT={levelT}
             cardT={t}
-            isTeachYou={false}
           />
           {match.bridge_languages.length > 0 && (
             <div className="space-y-1">

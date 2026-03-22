@@ -275,6 +275,85 @@ End-to-end coverage for the current UI feature set: authentication, session hand
 1. Navigate to Dashboard.
 **Expected:** Error message with retry button; localized error text.
 
+### D12. Level pair display — compact format
+**Setup:** Seed DB (`db/seeds/seed_test_profiles.sql` in amiglot-api). Sign in as Alice (test+seed1@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+2. Inspect a match card (e.g., Bob's card).
+**Expected:** Language badges show compact level pair format, e.g., `zh (Native → Elementary)` — not the verbose "teaches at Native · learns at Advanced" format. Arrow separates teacher level from learner level.
+
+### D13. Multi-language match card
+**Setup:** Seed DB. Sign in as Kevin (test+seed11@gnailuy.com) who targets both `zh` and `pt`.
+**Steps:**
+1. Navigate to Dashboard.
+2. Find Luna's card.
+**Expected:** Luna's card shows both `pt-BR` and `zh-Hans` under "They teach you", each with level pairs. "You teach them" shows `en` with Kevin's native level → Luna's learner level.
+
+### D14. Three-way language exchange visibility
+**Setup:** Seed DB. Sign in as Carlos (test+seed3@gnailuy.com) who speaks pt-BR + es native, en intermediate, targets en + zh.
+**Steps:**
+1. Navigate to Dashboard.
+2. Verify Diana's card appears (en↔pt exchange with en as bridge).
+3. Verify Kevin's card appears (targets pt, bridge en).
+**Expected:** Both matches visible. Diana's card: "They teach you: en (Native → Intermediate)", "You teach them: pt-BR (Native → Beginner)". Kevin's card similar with correct levels.
+
+### D15. Blocked user not shown
+**Setup:** Seed DB. Sign in as Bob (test+seed2@gnailuy.com) who has blocked Ivan.
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Ivan does NOT appear in results. Alice, Frank, Kevin, and other valid matches appear.
+
+### D16. Non-discoverable user hidden
+**Setup:** Seed DB. Sign in as Alice (test+seed1@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Julia (test+seed10, discoverable=false) does NOT appear even though her languages and availability would match.
+
+### D17. No availability overlap — no match
+**Setup:** Seed DB. Sign in as Alice (test+seed1@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Eve (test+seed5) does NOT appear — same language match as Bob but zero availability overlap.
+
+### D18. Minimal overlap threshold
+**Setup:** Seed DB. Sign in as Bob (test+seed2@gnailuy.com).
+**Steps:**
+1. Navigate to Dashboard.
+2. Find Frank's card.
+**Expected:** Frank appears (65 min overlap, just above the 60-min threshold). Overlap shows approximately "1h/week overlap".
+
+### D19. Rare language — empty results
+**Setup:** Seed DB. Sign in as Hiro (test+seed8@gnailuy.com) who targets Korean.
+**Steps:**
+1. Navigate to Dashboard.
+**Expected:** Empty state — "No matches found yet" — because no seeded user teaches Korean at level ≥ 4.
+
+### D20. Base-language match with seed data
+**Setup:** Seed DB. Sign in as Alice (test+seed1@gnailuy.com) who targets `zh`.
+**Steps:**
+1. Navigate to Dashboard.
+2. Find Grace's card.
+**Expected:** Grace (speaks `zh-Hans` native) appears as a match for Alice's `zh` target via base-language matching. Card shows `zh-Hans` under "They teach you".
+
+### D21. Country flag and age display
+**Setup:** Seed DB. Sign in as Alice.
+**Steps:**
+1. Navigate to Dashboard.
+2. Inspect Bob's card header.
+**Expected:** Card header shows 🇨🇳 flag, `@bob`, age (calculated from birth_year 1992), and "China" as country name.
+
+## 10.1 Test Data Setup
+
+For scenarios D12–D21, use the seed script in the API repo:
+
+```bash
+psql -f /path/to/amiglot-api/db/seeds/seed_test_profiles.sql
+```
+
+This script is idempotent — it cleans previous seed data before inserting. It creates 12 test users covering: basic mutual match, multi-language, bridge-only, no overlap, minimal overlap, base-language matching, blocked pairs, non-discoverable users, and rare languages with no matches.
+
+See the comment block at the end of `seed_test_profiles.sql` for the full expected match matrix.
+
 ## 11. Regression Checklist
 - No console errors on Home, Login, Verify, Profile.
 - Forms remain responsive during normal use.

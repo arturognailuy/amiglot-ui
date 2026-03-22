@@ -177,8 +177,7 @@
       "yourTime": "Horários Disponíveis",
       "bridgeTooltip": "Um idioma que vocês dois falam bem o suficiente para se comunicar enquanto aprendem",
       "yourTimeTooltip": "Horários compatíveis exibidos no seu fuso horário",
-      "teacherLevel": "ensina no nível {level}",
-      "learnerLevel": "aprende no nível {level}"
+      "levelPair": "{teacher} → {learner}"
     }
   }
 }

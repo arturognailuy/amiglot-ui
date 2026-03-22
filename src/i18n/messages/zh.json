@@ -177,8 +177,7 @@
       "yourTime": "可用时段",
       "bridgeTooltip": "双方都能流利使用的共同语言，便于学习过程中的交流",
       "yourTimeTooltip": "匹配的时段已按照你的本地时区显示",
-      "teacherLevel": "教学水平：{level}",
-      "learnerLevel": "学习水平：{level}"
+      "levelPair": "{teacher} → {learner}"
     }
   }
 }

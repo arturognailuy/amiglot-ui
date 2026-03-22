@@ -177,8 +177,7 @@
       "yourTime": "Available Times",
       "bridgeTooltip": "A shared language you both speak well enough to communicate in while learning",
       "yourTimeTooltip": "Matched time slots shown in your local timezone",
-      "teacherLevel": "teaches at {level}",
-      "learnerLevel": "learns at {level}"
+      "levelPair": "{teacher} → {learner}"
     }
   }
 }
